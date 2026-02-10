@@ -1,0 +1,2742 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Re:Kingdom - 知識の王国を取り戻せ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-darkest: #0a0a0f;
+      --bg-dark: #12121a;
+      --bg-medium: #1a1a2e;
+      --bg-light: #252540;
+      --accent-gold: #c9a227;
+      --accent-gold-light: #e8c547;
+      --accent-red: #8b2942;
+      --accent-red-light: #a83250;
+      --text-primary: #e8e6e3;
+      --text-secondary: #9a9a9a;
+      --text-dim: #5a5a6a;
+      --prosperity-high: #2d5a3d;
+      --prosperity-medium: #5a5a2d;
+      --prosperity-low: #5a2d2d;
+      --border-subtle: rgba(201, 162, 39, 0.2);
+      --shadow-glow: rgba(201, 162, 39, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: var(--bg-darkest);
+      color: var(--text-primary);
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow: hidden;
+    }
+    .app-container { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+    header {
+      padding: 0.75rem 1rem;
+      background: linear-gradient(180deg, rgba(18, 18, 26, 0.95) 0%, rgba(18, 18, 26, 0.8) 100%);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex; justify-content: space-between; align-items: center;
+      z-index: 100; backdrop-filter: blur(10px);
+    }
+    .logo { font-family: 'Cinzel', serif; font-size: 1.25rem; font-weight: 700; color: var(--accent-gold); text-shadow: 0 0 20px var(--shadow-glow); }
+    .logo span { color: var(--text-primary); font-weight: 400; }
+    .header-stats { display: flex; gap: 1rem; font-size: 0.8rem; }
+    .streak-display { color: var(--accent-gold-light); font-weight: 600; }
+    .streak-display .stat-value { color: var(--accent-gold); }
+    .streak-milestone { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9000; background: rgba(10, 10, 15, 0.9); border: 2px solid var(--accent-gold); border-radius: 16px; padding: 2rem; text-align: center; min-width: 280px; backdrop-filter: blur(8px); animation: milestoneAppear 0.5s ease; }
+    .streak-milestone .milestone-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+    .streak-milestone .milestone-title { font-family: 'Cinzel', serif; font-size: 1.2rem; color: var(--accent-gold); margin-bottom: 0.25rem; }
+    .streak-milestone .milestone-subtitle { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem; }
+    .streak-milestone .milestone-btn { padding: 0.5rem 1.5rem; background: var(--accent-gold); color: var(--bg-darkest); border: none; border-radius: 8px; font-family: 'Noto Sans JP', sans-serif; font-size: 0.85rem; cursor: pointer; }
+    @keyframes milestoneAppear { from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+    /* 実績システム */
+    .achievements-grid { display: grid; grid-template-columns: 1fr; gap: 0.5rem; padding: 0.75rem; overflow-y: auto; }
+    .achievement-card { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--bg-medium); border: 1px solid var(--border-color); border-radius: 10px; transition: all 0.3s ease; }
+    .achievement-card.unlocked { border-color: var(--accent-gold); background: linear-gradient(135deg, rgba(201,162,39,0.08), var(--bg-medium)); }
+    .achievement-card.locked { opacity: 0.5; }
+    .achievement-icon { font-size: 1.8rem; min-width: 2.5rem; text-align: center; }
+    .achievement-card.locked .achievement-icon { filter: grayscale(1); }
+    .achievement-info { flex: 1; min-width: 0; }
+    .achievement-name { font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--accent-gold); margin-bottom: 0.15rem; }
+    .achievement-card.locked .achievement-name { color: var(--text-secondary); }
+    .achievement-desc { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.3; }
+    .achievement-date { font-size: 0.65rem; color: var(--accent-gold-light); margin-top: 0.2rem; }
+    .achievement-progress { min-width: 3rem; text-align: right; font-size: 0.7rem; color: var(--text-secondary); }
+    .achievement-summary { display: flex; justify-content: center; gap: 1.5rem; padding: 0.75rem; border-bottom: 1px solid var(--border-color); font-size: 0.8rem; color: var(--text-secondary); }
+    .achievement-summary .ach-count { color: var(--accent-gold); font-weight: 600; font-size: 1rem; }
+    .items-summary { display: flex; justify-content: center; gap: 1.5rem; padding: 0.75rem; border-bottom: 1px solid var(--border-color); font-size: 0.8rem; color: var(--text-secondary); }
+    .items-summary .item-count { color: var(--accent-gold); font-weight: 600; font-size: 1rem; }
+    .items-grid { display: grid; grid-template-columns: 1fr; gap: 0.5rem; padding: 0.75rem; overflow-y: auto; }
+    .item-card { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--bg-medium); border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; transition: all 0.3s ease; }
+    .item-card:hover { border-color: var(--accent-gold); transform: translateX(2px); }
+    .item-card.owned { border-color: var(--accent-gold); background: linear-gradient(135deg, rgba(201,162,39,0.08), var(--bg-medium)); }
+    .item-card.not-owned { opacity: 0.4; cursor: default; }
+    .item-card.not-owned:hover { border-color: var(--border-color); transform: none; }
+    .item-card .item-icon { font-size: 1.5rem; min-width: 2rem; text-align: center; }
+    .item-card .item-info { flex: 1; }
+    .item-card .item-name { font-size: 0.85rem; font-weight: 500; color: var(--text-primary); }
+    .item-card .item-type { font-size: 0.7rem; color: var(--text-secondary); }
+    .item-card.not-owned .item-icon { filter: grayscale(1); }
+    .item-card.not-owned .item-name { color: var(--text-secondary); }
+    .item-detail-icon { font-size: 3rem; text-align: center; margin-bottom: 0.5rem; }
+    .item-detail-name { font-size: 1.1rem; font-weight: 600; color: var(--accent-gold); text-align: center; margin-bottom: 0.25rem; }
+    .item-detail-type { font-size: 0.75rem; color: var(--text-secondary); text-align: center; margin-bottom: 1rem; }
+    .item-detail-desc { font-size: 0.85rem; color: var(--text-primary); margin-bottom: 1rem; line-height: 1.6; }
+    .item-detail-lore { font-size: 0.8rem; color: var(--text-secondary); font-style: italic; border-left: 2px solid var(--accent-gold); padding-left: 0.75rem; margin-bottom: 1rem; line-height: 1.6; }
+    .item-detail-date { font-size: 0.75rem; color: var(--text-secondary); text-align: center; }
+    .sync-btn { background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.3rem 0.5rem; cursor: pointer; display: flex; align-items: center; gap: 0.3rem; transition: all 0.3s ease; position: relative; }
+    .sync-btn:hover { border-color: var(--accent-gold); }
+    .sync-btn .sync-icon { font-size: 0.9rem; }
+    .sync-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #666; }
+    .sync-status-dot.connected { background: #4caf50; }
+    .sync-status-dot.syncing { background: #ffc107; animation: pulse 1s infinite; }
+    .sync-status-dot.error { background: #f44336; }
+    .sync-config-area { width: 100%; min-height: 80px; background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); font-family: monospace; font-size: 0.7rem; padding: 0.5rem; resize: vertical; }
+    .sync-id-input { width: 100%; background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); font-family: monospace; font-size: 0.85rem; padding: 0.5rem; }
+    .sync-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+    .sync-actions button { flex: 1; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-medium); color: var(--text-primary); cursor: pointer; font-size: 0.8rem; transition: all 0.3s; }
+    .sync-actions button:hover { border-color: var(--accent-gold); background: rgba(201,162,39,0.1); }
+    .sync-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .sync-status-text { font-size: 0.75rem; color: var(--text-secondary); text-align: center; margin-top: 0.75rem; }
+    .sync-hint { font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.25rem; }
+    .sync-toggle { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.75rem; font-size: 0.8rem; color: var(--text-secondary); cursor: pointer; }
+    .sync-toggle input { accent-color: var(--accent-gold); }
+    .sync-section-label { font-size: 0.8rem; color: var(--accent-gold); margin-bottom: 0.35rem; font-weight: 500; margin-top: 0.75rem; }
+    .sync-section-label:first-child { margin-top: 0; }
+    .achievement-popup { position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 9000; background: linear-gradient(135deg, rgba(10,10,15,0.95), rgba(30,28,20,0.95)); border: 2px solid var(--accent-gold); border-radius: 12px; padding: 0.75rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; backdrop-filter: blur(8px); animation: achPopIn 0.5s ease, achPopOut 0.5s ease 2.5s forwards; box-shadow: 0 4px 20px rgba(201,162,39,0.3); }
+    .achievement-popup .ach-pop-icon { font-size: 1.5rem; }
+    .achievement-popup .ach-pop-text { font-size: 0.8rem; }
+    .achievement-popup .ach-pop-text span { display: block; font-family: 'Cinzel', serif; color: var(--accent-gold); font-size: 0.85rem; }
+    @keyframes achPopIn { from { opacity: 0; transform: translateX(-50%) translateY(-2rem); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+    @keyframes achPopOut { from { opacity: 1; } to { opacity: 0; transform: translateX(-50%) translateY(-2rem); } }
+    .stat-item { display: flex; align-items: center; gap: 0.35rem; }
+    .stat-value { color: var(--accent-gold-light); font-weight: 500; }
+    .tab-nav { display: flex; background: var(--bg-dark); border-bottom: 1px solid var(--border-subtle); z-index: 100; }
+    .tab-btn { flex: 1; padding: 0.75rem 0.5rem; background: none; border: none; color: var(--text-secondary); font-family: 'Noto Sans JP', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all 0.3s ease; position: relative; }
+    .tab-btn:hover { color: var(--text-primary); background: rgba(201, 162, 39, 0.05); }
+    .tab-btn.active { color: var(--accent-gold); }
+    .tab-btn.active::after { content: ''; position: absolute; bottom: 0; left: 20%; width: 60%; height: 2px; background: var(--accent-gold); }
+    .tab-btn .notification-dot { position: absolute; top: 0.4rem; right: calc(50% - 1.5rem); width: 6px; height: 6px; background: var(--accent-red-light); border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .tab-content { flex: 1; display: none; flex-direction: column; overflow: hidden; }
+    .tab-content.active { display: flex; }
+    .vn-container { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+    .vn-background { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; background-repeat: no-repeat; z-index: 0; transition: opacity 0.5s ease; }
+    .vn-background-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, rgba(10, 10, 15, 0.3) 0%, rgba(10, 10, 15, 0.1) 50%, rgba(10, 10, 15, 0.4) 100%); z-index: 1; pointer-events: none; }
+    .vn-character-area { flex: 1; display: flex; justify-content: center; align-items: flex-end; position: relative; z-index: 10; min-height: 200px; }
+    .claire-sprite { max-height: 100%; max-width: 90%; object-fit: contain; object-position: bottom center; transition: opacity 0.3s ease, transform 0.3s ease; filter: drop-shadow(0 0 30px rgba(0, 0, 0, 0.5)); }
+    .claire-sprite.changing { opacity: 0; transform: scale(0.98); }
+    .scene-blackout { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 25; opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
+    .scene-blackout.active { opacity: 1; }
+    /* 篝火演出オーバーレイ */
+    .bonfire-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 30; background: #000; display: none; align-items: center; justify-content: center; }
+    .bonfire-overlay.active { display: flex; }
+    .bonfire-video { width: 100%; height: 100%; object-fit: cover; }
+    .bonfire-skip { position: absolute; bottom: 1.5rem; right: 1.5rem; padding: 0.5rem 1rem; background: rgba(0,0,0,0.6); border: 1px solid rgba(201,162,39,0.5); border-radius: 20px; color: var(--accent-gold); font-family: 'Noto Sans JP', sans-serif; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; z-index: 31; backdrop-filter: blur(4px); }
+    .bonfire-skip:hover { background: rgba(201,162,39,0.2); border-color: var(--accent-gold); }
+    .claire-sprite.scene-hide { opacity: 0; transform: scale(0.98); transition: opacity 0.5s ease, transform 0.5s ease; }
+    .vn-background.scene-hide { opacity: 0; transition: opacity 0.6s ease; }
+    .vn-dialogue-area { position: relative; z-index: 20; padding: 0 1rem 1rem 1rem; }
+    .speech-bubble { background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(18, 18, 26, 0.95) 100%); border: 2px solid var(--border-subtle); border-radius: 16px; padding: 1rem 1.25rem; position: relative; backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(201, 162, 39, 0.1); }
+    .speech-bubble::before { content: ''; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); border-left: 12px solid transparent; border-right: 12px solid transparent; border-bottom: 12px solid var(--border-subtle); }
+    .speech-bubble::after { content: ''; position: absolute; top: -9px; left: 50%; transform: translateX(-50%); border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 10px solid rgba(26, 26, 46, 0.95); }
+    .speaker-name { font-family: 'Cinzel', serif; font-size: 0.9rem; color: var(--accent-gold); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .speaker-name::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--border-subtle) 0%, transparent 100%); }
+    .dialogue-text { font-size: 0.95rem; line-height: 1.7; color: var(--text-primary); min-height: 3em; }
+    .dialogue-text p { margin-bottom: 0.5rem; }
+    .dialogue-text p:last-child { margin-bottom: 0; }
+    .typing-indicator { display: flex; gap: 4px; padding: 0.25rem 0; }
+    .typing-dot { width: 6px; height: 6px; background: var(--accent-gold); border-radius: 50%; animation: typingBounce 1.4s infinite ease-in-out; }
+    .typing-dot:nth-child(1) { animation-delay: 0s; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingBounce { 0%, 80%, 100% { transform: translateY(0); opacity: 0.4; } 40% { transform: translateY(-4px); opacity: 1; } }
+    .quick-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border-subtle); }
+    .quick-action-btn { padding: 0.5rem 1rem; background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%); border: 1px solid var(--border-subtle); border-radius: 20px; color: var(--text-primary); font-size: 0.85rem; font-family: 'Noto Sans JP', sans-serif; cursor: pointer; transition: all 0.2s ease; }
+    .quick-action-btn:hover { background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-gold-light) 100%); color: var(--bg-darkest); border-color: var(--accent-gold); transform: translateY(-1px); }
+    .vn-input-area { padding: 0.75rem 1rem; background: linear-gradient(180deg, transparent 0%, rgba(18, 18, 26, 0.9) 100%); position: relative; z-index: 20; }
+    .input-wrapper { display: flex; gap: 0.5rem; align-items: flex-end; }
+    .input-field { flex: 1; padding: 0.75rem 1rem; background: var(--bg-medium); border: 1px solid var(--border-subtle); border-radius: 24px; color: var(--text-primary); font-family: 'Noto Sans JP', sans-serif; font-size: 0.95rem; resize: none; min-height: 44px; max-height: 100px; }
+    .input-field:focus { outline: none; border-color: var(--accent-gold); box-shadow: 0 0 15px var(--shadow-glow); }
+    .input-field::placeholder { color: var(--text-dim); }
+    .send-btn { width: 44px; height: 44px; background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-gold-light) 100%); border: none; border-radius: 50%; color: var(--bg-darkest); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s ease; flex-shrink: 0; }
+    .send-btn:hover { transform: scale(1.05); }
+    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .map-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-darkest); }
+    .map-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; background: var(--bg-dark); }
+    .kingdom-name { font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--accent-gold); }
+    .kingdom-progress { font-size: 0.8rem; color: var(--text-secondary); }
+    .map-container { flex: 1; overflow-y: auto; padding: 1rem; }
+    .map-placeholder { height: 100%; min-height: 250px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-medium); border: 2px dashed var(--border-subtle); border-radius: 12px; color: var(--text-secondary); text-align: center; padding: 2rem; }
+    .map-placeholder-icon { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.5; }
+    .regions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.75rem; }
+    .region-card { background: var(--bg-medium); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 0.875rem; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; }
+    .region-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--prosperity-low); }
+    .region-card.conquered::before { background: var(--prosperity-high); }
+    .region-card:hover { border-color: var(--accent-gold); transform: translateY(-2px); }
+    .region-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
+    .region-name { font-weight: 500; font-size: 0.9rem; }
+    .region-status { font-size: 0.7rem; padding: 0.2rem 0.4rem; border-radius: 4px; background: var(--bg-light); }
+    .region-status.conquered { background: var(--prosperity-high); }
+    .region-territories { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.5rem; }
+    .territory-tag { font-size: 0.7rem; padding: 0.2rem 0.4rem; background: var(--bg-light); border-radius: 3px; color: var(--text-secondary); }
+    .territory-tag.conquered { background: rgba(45, 90, 61, 0.3); color: #6abf7b; }
+    .region-prosperity { margin-top: 0.5rem; display: flex; align-items: center; gap: 0.4rem; }
+    .prosperity-bar { flex: 1; height: 4px; background: var(--bg-light); border-radius: 2px; overflow: hidden; }
+    .prosperity-fill { height: 100%; background: linear-gradient(90deg, var(--prosperity-low) 0%, var(--prosperity-medium) 50%, var(--prosperity-high) 100%); border-radius: 2px; transition: width 0.5s ease; }
+    .prosperity-value { font-size: 0.75rem; color: var(--accent-gold); min-width: 32px; text-align: right; }
+    .quest-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-darkest); }
+    .quest-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; background: var(--bg-dark); }
+    .quest-header h2 { font-size: 1rem; font-weight: 500; }
+    .add-quest-btn { padding: 0.4rem 0.75rem; background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-gold-light) 100%); border: none; border-radius: 6px; color: var(--bg-darkest); font-size: 0.8rem; font-weight: 500; cursor: pointer; }
+    .quest-list { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; color: var(--text-secondary); }
+    .empty-state-icon { font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5; }
+    .dialogue-quest-list { max-height: 40vh; overflow-y: auto; display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; padding-right: 0.25rem; }
+    .dialogue-quest-card { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.6rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.78rem; transition: border-color 0.2s; }
+    .dialogue-quest-card:hover { border-color: var(--accent-gold); }
+    .dialogue-quest-card .dqc-icon { font-size: 1rem; opacity: 0.7; }
+    .dialogue-quest-card .dqc-body { flex: 1; min-width: 0; }
+    .dialogue-quest-card .dqc-title { color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dialogue-quest-card .dqc-meta { color: var(--text-secondary); font-size: 0.7rem; margin-top: 0.15rem; }
+    .dialogue-quest-nav { display: flex; justify-content: center; align-items: center; gap: 0.75rem; margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-secondary); }
+    .dialogue-quest-nav button { background: none; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); padding: 0.25rem 0.6rem; cursor: pointer; font-size: 0.75rem; transition: all 0.2s; }
+    .dialogue-quest-nav button:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+    .dialogue-quest-nav button:disabled { opacity: 0.3; cursor: default; }
+    .dialogue-quest-empty { text-align: center; color: var(--text-secondary); font-size: 0.8rem; padding: 1rem 0; }
+    .dialogue-quest-detail { margin-top: 0.5rem; }
+    .dqd-title { font-size: 0.95rem; font-weight: 600; color: var(--accent-gold); margin-bottom: 0.75rem; }
+    .dqd-row { display: flex; gap: 0.5rem; margin-bottom: 0.4rem; font-size: 0.8rem; }
+    .dqd-label { color: var(--text-secondary); min-width: 5rem; flex-shrink: 0; }
+    .dqd-value { color: var(--text-primary); }
+    .dqd-memo { margin-top: 0.75rem; padding: 0.6rem 0.75rem; background: rgba(255,255,255,0.04); border-left: 2px solid var(--accent-gold); border-radius: 0 6px 6px 0; font-size: 0.8rem; color: var(--text-primary); line-height: 1.6; white-space: pre-wrap; }
+    .dqd-no-memo { color: var(--text-secondary); font-style: italic; font-size: 0.78rem; margin-top: 0.75rem; }
+    .alert-card { background: linear-gradient(135deg, rgba(139, 41, 66, 0.2) 0%, rgba(139, 41, 66, 0.1) 100%); border: 1px solid var(--accent-red); border-radius: 8px; padding: 0.75rem; display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+    .alert-icon { font-size: 1.25rem; }
+    .alert-content { flex: 1; }
+    .alert-title { font-weight: 500; font-size: 0.9rem; color: var(--accent-red-light); margin-bottom: 0.15rem; }
+    .alert-message { font-size: 0.75rem; color: var(--text-secondary); }
+    .alert-action { padding: 0.4rem 0.75rem; background: var(--accent-red); border: none; border-radius: 6px; color: var(--text-primary); cursor: pointer; font-size: 0.8rem; }
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; backdrop-filter: blur(4px); }
+    .modal-overlay.active { display: flex; }
+    .modal { background: var(--bg-dark); border: 1px solid var(--border-subtle); border-radius: 12px; width: 100%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
+    .modal-header { padding: 1rem; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--accent-gold); }
+    .modal-close { width: 28px; height: 28px; background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.25rem; display: flex; align-items: center; justify-content: center; }
+    .modal-body { padding: 1rem; }
+    .form-group { margin-bottom: 0.875rem; }
+    .form-label { display: block; margin-bottom: 0.35rem; font-size: 0.85rem; color: var(--text-secondary); }
+    .form-input, .form-select { width: 100%; padding: 0.65rem 0.875rem; background: var(--bg-medium); border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-primary); font-family: 'Noto Sans JP', sans-serif; font-size: 0.95rem; }
+    .form-input:focus, .form-select:focus { outline: none; border-color: var(--accent-gold); }
+    .modal-footer { padding: 1rem; border-top: 1px solid var(--border-subtle); display: flex; gap: 0.5rem; justify-content: flex-end; }
+    .btn-secondary { padding: 0.6rem 1.25rem; background: var(--bg-light); border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-primary); cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
+    .btn-primary { padding: 0.6rem 1.25rem; background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-gold-light) 100%); border: none; border-radius: 6px; color: var(--bg-darkest); font-weight: 500; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
+    .territory-detail-status { background: var(--bg-medium); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+    .territory-status-row { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; border-bottom: 1px solid var(--border-subtle); }
+    .territory-status-row:last-child { border-bottom: none; }
+    .territory-status-label { color: var(--text-secondary); font-size: 0.85rem; }
+    .territory-status-value { font-weight: 500; }
+    .territory-status-value.conquered { color: #6abf7b; }
+    .territory-status-value.unconquered { color: var(--text-dim); }
+    .territory-detail-section { margin-bottom: 1rem; }
+    .territory-detail-label { font-size: 0.9rem; color: var(--accent-gold); margin-bottom: 0.5rem; font-weight: 500; }
+    .territory-history-list { background: var(--bg-medium); border-radius: 8px; max-height: 150px; overflow-y: auto; }
+    .territory-history-item { display: flex; justify-content: space-between; padding: 0.6rem 1rem; border-bottom: 1px solid var(--border-subtle); font-size: 0.85rem; }
+    .territory-history-item:last-child { border-bottom: none; }
+    .territory-history-date { color: var(--text-secondary); }
+    .territory-history-score { font-weight: 500; }
+    .territory-history-score.high { color: #6abf7b; }
+    .territory-history-score.medium { color: var(--accent-gold); }
+    .territory-history-score.low { color: var(--accent-red-light); }
+    .territory-history-empty { padding: 1rem; text-align: center; color: var(--text-dim); font-size: 0.85rem; }
+    .territory-detail-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 1rem; }
+    .td-stat { background: var(--bg-medium); border-radius: 8px; padding: 0.6rem 0.5rem; text-align: center; }
+    .td-stat-value { font-size: 1.1rem; font-weight: 600; color: var(--accent-gold); }
+    .td-stat-label { font-size: 0.65rem; color: var(--text-secondary); margin-top: 0.15rem; }
+    .territory-quest-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-subtle); font-size: 0.82rem; cursor: pointer; transition: background 0.2s; }
+    .territory-quest-item:last-child { border-bottom: none; }
+    .territory-quest-item:hover { background: rgba(201,162,39,0.08); }
+    .tqi-icon { font-size: 0.9rem; flex-shrink: 0; }
+    .tqi-body { flex: 1; min-width: 0; }
+    .tqi-title { color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tqi-meta { color: var(--text-dim); font-size: 0.72rem; margin-top: 0.1rem; }
+    .tqi-arrow { color: var(--text-dim); font-size: 0.7rem; flex-shrink: 0; }
+    .territory-test-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-subtle); font-size: 0.82rem; }
+    .territory-test-item:last-child { border-bottom: none; }
+    .tti-score { font-weight: 600; min-width: 3rem; text-align: right; }
+    .tti-date { color: var(--text-secondary); flex-shrink: 0; }
+    .tti-note { flex: 1; color: var(--text-dim); font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: 0.25rem; }
+    .territory-detail-actions { display: flex; gap: 0.5rem; padding: 0 1.25rem 1rem; }
+    .territory-detail-actions .btn-action { flex: 1; padding: 0.6rem; font-size: 0.82rem; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-medium); color: var(--text-primary); cursor: pointer; transition: all 0.2s; text-align: center; font-family: 'Noto Sans JP', sans-serif; }
+    .territory-detail-actions .btn-action:hover { border-color: var(--accent-gold); background: rgba(201,162,39,0.1); }
+    .territory-detail-more { text-align: center; padding: 0.4rem; font-size: 0.75rem; color: var(--text-dim); cursor: pointer; }
+    .territory-detail-more:hover { color: var(--accent-gold); }
+    .territory-memo { resize: vertical; min-height: 80px; }
+    .territory-tag { cursor: pointer; transition: all 0.2s ease; }
+    .territory-tag:hover { background: var(--accent-gold); color: var(--bg-darkest); }
+    .chat-btn { width: 44px; height: 44px; background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%); border: 1px solid var(--border-subtle); border-radius: 50%; color: var(--accent-gold); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0; }
+    .chat-btn:hover { background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-gold-light) 100%); color: var(--bg-darkest); border-color: var(--accent-gold); transform: scale(1.05); }
+    .chat-menu-modal { max-width: 320px; }
+    .chat-menu-body { padding: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .chat-menu-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1rem; background: var(--bg-medium); border: 1px solid var(--border-subtle); border-radius: 10px; color: var(--text-primary); font-family: 'Noto Sans JP', sans-serif; font-size: 0.95rem; cursor: pointer; transition: all 0.2s ease; text-align: left; }
+    .chat-menu-item:hover { background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 100%); border-color: var(--accent-gold); transform: translateX(4px); }
+    .chat-menu-icon { font-size: 1.25rem; }
+    .chat-menu-label { flex: 1; }
+    @media (max-width: 480px) { .header-stats { display: none; } .logo { font-size: 1.1rem; } .tab-btn { font-size: 0.7rem; padding: 0.6rem 0.1rem; } .regions-grid { grid-template-columns: 1fr; } }
+    /* 体調記録モーダル */
+    .condition-modal { max-width: 400px; }
+    .condition-modal-body { max-height: 60vh; overflow-y: auto; padding: 0.75rem 1.25rem; }
+    .cond-section { margin-bottom: 0.85rem; }
+    .cond-label { font-size: 0.82rem; color: var(--accent-gold); margin-bottom: 0.4rem; font-weight: 500; }
+    .cond-level-group { display: flex; gap: 0.3rem; }
+    .cond-level-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.15rem; padding: 0.5rem 0.2rem; background: var(--bg-medium); border: 2px solid var(--border-subtle); border-radius: 10px; cursor: pointer; transition: all 0.2s; font-family: 'Noto Sans JP', sans-serif; }
+    .cond-level-btn:hover { border-color: var(--accent-gold); }
+    .cond-level-btn.active { border-color: var(--accent-gold); background: rgba(201,162,39,0.15); box-shadow: 0 0 8px rgba(201,162,39,0.3); }
+    .cond-level-emoji { font-size: 1.4rem; }
+    .cond-level-text { font-size: 0.65rem; color: var(--text-secondary); }
+    .cond-level-btn.active .cond-level-text { color: var(--accent-gold); }
+    .cond-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .cond-tag { padding: 0.35rem 0.6rem; background: var(--bg-medium); border: 1px solid var(--border-subtle); border-radius: 20px; cursor: pointer; font-size: 0.75rem; color: var(--text-secondary); transition: all 0.2s; font-family: 'Noto Sans JP', sans-serif; }
+    .cond-tag:hover { border-color: var(--text-secondary); }
+    .cond-tag.active { border-color: var(--accent-red-light); background: rgba(232,100,100,0.15); color: var(--accent-red-light); }
+    .cond-row-group { display: flex; gap: 0.75rem; }
+    .cond-row-item { flex: 1; }
+    .cond-input-row { display: flex; align-items: center; gap: 0.4rem; }
+    .cond-num { width: 100%; max-width: 90px; padding: 0.4rem 0.5rem; font-size: 0.85rem; }
+    .cond-unit { font-size: 0.78rem; color: var(--text-secondary); flex-shrink: 0; }
+    .cond-meal-group { display: flex; gap: 0.75rem; }
+    .cond-meal { display: flex; align-items: center; gap: 0.3rem; cursor: pointer; font-size: 0.85rem; color: var(--text-primary); }
+    .cond-meal input { accent-color: var(--accent-gold); width: 16px; height: 16px; }
+    /* 体調分析 */
+    .cond-analysis { margin-top: 0.5rem; }
+    .cond-chart-section { margin-bottom: 1rem; }
+    .cond-chart-title { font-size: 0.82rem; color: var(--accent-gold); margin-bottom: 0.4rem; font-weight: 500; }
+    .cond-bar-chart { display: flex; align-items: flex-end; gap: 0.35rem; min-height: 80px; padding-top: 0.25rem; }
+    .cond-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }
+    .cond-bar { width: 100%; border-radius: 3px 3px 0 0; transition: height 0.3s; min-height: 2px; }
+    .cond-bar-label { font-size: 0.65rem; color: var(--text-dim); }
+    .cond-bar-value { font-size: 0.65rem; color: var(--text-secondary); }
+    .cond-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .cond-stat-card { background: var(--bg-medium); border-radius: 8px; padding: 0.5rem 0.6rem; }
+    .cond-stat-card-title { font-size: 0.7rem; color: var(--text-dim); }
+    .cond-stat-card-value { font-size: 1rem; font-weight: 600; color: var(--text-primary); margin-top: 0.15rem; }
+    .cond-tag-freq { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem; font-size: 0.78rem; }
+    .cond-tag-freq-bar { height: 6px; background: var(--accent-red-light); border-radius: 3px; transition: width 0.3s; }
+    .cond-tag-freq-name { min-width: 5rem; color: var(--text-secondary); }
+    .cond-tag-freq-count { color: var(--text-dim); font-size: 0.7rem; min-width: 2rem; text-align: right; }
+    .cond-insight { margin-top: 0.5rem; padding: 0.6rem 0.75rem; background: rgba(201,162,39,0.08); border-left: 2px solid var(--accent-gold); border-radius: 0 6px 6px 0; font-size: 0.78rem; color: var(--text-primary); line-height: 1.6; }
+    /* タイマーオーバーレイ */
+    /* スプラッシュ画面（起動演出） */
+    .splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; cursor: pointer; background: var(--bg-darkest); }
+    .splash-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 0.5s ease; }
+    .splash-image.hidden { opacity: 0; }
+    .splash-hint { position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); color: var(--text-secondary); font-size: 0.85rem; animation: splashPulse 2s infinite; pointer-events: none; text-shadow: 0 1px 4px rgba(0,0,0,0.8); }
+    @keyframes splashPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+    .splash-screen.fade-out { opacity: 0; transition: opacity 0.8s ease; pointer-events: none; }
+    /* タイマーオーバーレイ */
+    .timer-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+    .timer-overlay.active { display: flex; }
+    .timer-display { background: rgba(10, 10, 15, 0.75); border: 2px solid var(--border-subtle); border-radius: 16px; padding: 1.25rem 2rem; text-align: center; pointer-events: auto; backdrop-filter: blur(8px); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); min-width: 220px; }
+    .timer-territory { font-size: 0.8rem; color: var(--accent-gold); margin-bottom: 0.25rem; font-weight: 500; }
+    .timer-phase { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+    .timer-phase.work { color: var(--accent-gold-light); }
+    .timer-phase.break { color: #6abf7b; }
+    .timer-time { font-family: 'Cinzel', serif; font-size: 3rem; color: var(--text-primary); letter-spacing: 0.1em; line-height: 1; margin-bottom: 0.75rem; }
+    .timer-time.break { color: #6abf7b; }
+    .timer-controls { display: flex; gap: 0.5rem; justify-content: center; }
+    .timer-ctrl-btn { padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border-subtle); font-family: 'Noto Sans JP', sans-serif; font-size: 0.8rem; cursor: pointer; transition: all 0.2s ease; }
+    .timer-ctrl-btn.pause { background: var(--bg-light); color: var(--text-primary); }
+    .timer-ctrl-btn.pause:hover { background: var(--accent-gold); color: var(--bg-darkest); border-color: var(--accent-gold); }
+    .timer-ctrl-btn.stop { background: rgba(139, 41, 66, 0.3); color: var(--accent-red-light); border-color: var(--accent-red); }
+    .timer-ctrl-btn.stop:hover { background: var(--accent-red); color: var(--text-primary); }
+    /* 学習開始モーダル */
+    .study-step { display: none; }
+    .study-step.active { display: block; }
+    .mode-select-grid { display: flex; flex-direction: column; gap: 0.5rem; }
+    .mode-option { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: var(--bg-medium); border: 1px solid var(--border-subtle); border-radius: 10px; cursor: pointer; transition: all 0.2s ease; text-align: left; font-family: 'Noto Sans JP', sans-serif; color: var(--text-primary); }
+    .mode-option:hover { border-color: var(--accent-gold); transform: translateX(4px); }
+    .mode-option.selected { border-color: var(--accent-gold); background: rgba(201, 162, 39, 0.1); }
+    .mode-icon { font-size: 1.5rem; }
+    .mode-info { flex: 1; }
+    .mode-name { font-weight: 500; font-size: 0.95rem; margin-bottom: 0.15rem; }
+    .mode-desc { font-size: 0.75rem; color: var(--text-secondary); }
+  </style>
+</head>
+<body>
+  <!-- セリフデータの読み込み -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
+  <script src="dialogues/claire.js"></script>
+  
+  <!-- スプラッシュ画面（起動演出） -->
+  <div class="splash-screen" id="splash-screen">
+    <img src="" alt="" class="splash-image" id="splash-idle">
+    <img src="" alt="" class="splash-image hidden" id="splash-notice">
+    <div class="splash-hint" id="splash-hint">タップして始める</div>
+  </div>
+
+  <div class="app-container">
+    <header>
+      <div class="logo">Re:<span>Kingdom</span></div>
+      <div class="header-stats">
+        <div class="stat-item streak-display" id="streak-display" style="display:none;"><span>🔥</span><span class="stat-value" id="streak-count">0</span></div>
+        <div class="stat-item"><span>📜</span><span class="stat-value" id="total-quests">0</span></div>
+        <div class="stat-item"><span>🏰</span><span class="stat-value" id="conquered-territories">0</span><span>/<span id="total-territories">0</span></span></div>
+        <button class="sync-btn" id="sync-btn" title="クラウド同期"><span class="sync-icon">☁️</span><span class="sync-status-dot" id="sync-status-dot"></span></button>
+      </div>
+    </header>
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="dialogue">クレア</button>
+      <button class="tab-btn" data-tab="map">王国地図</button>
+      <button class="tab-btn" data-tab="review">復習<span class="notification-dot" id="review-notification" style="display: none;"></span></button>
+      <button class="tab-btn" data-tab="achievements">実績</button>
+      <button class="tab-btn" data-tab="items">所持品</button>
+    </nav>
+    <main class="main-content">
+      <div class="tab-content active" id="tab-dialogue">
+        <div class="vn-container">
+          <div class="vn-background" id="vn-background"></div>
+          <div class="vn-background-overlay"></div>
+          <div class="scene-blackout" id="scene-blackout"></div>
+          <div class="bonfire-overlay" id="bonfire-overlay">
+            <video class="bonfire-video" id="bonfire-video" playsinline preload="none">
+              <source src="images/effects/bonfire_offering.mp4" type="video/mp4">
+            </video>
+            <button class="bonfire-skip" id="bonfire-skip">スキップ ▶▶</button>
+          </div>
+          <div class="timer-overlay" id="timer-overlay">
+            <div class="timer-display">
+              <div class="timer-territory" id="timer-territory"></div>
+              <div class="timer-phase" id="timer-phase"></div>
+              <div class="timer-time" id="timer-time">25:00</div>
+              <div class="timer-controls">
+                <button class="timer-ctrl-btn pause" id="timer-pause">一時停止</button>
+                <button class="timer-ctrl-btn stop" id="timer-stop">終了</button>
+              </div>
+            </div>
+          </div>
+          <div class="vn-character-area">
+            <img src="images/chara/claire/normal.png" alt="クレア" class="claire-sprite" id="claire-sprite">
+          </div>
+          <div class="vn-dialogue-area">
+            <div class="speech-bubble">
+              <div class="speaker-name">クレア</div>
+              <div class="dialogue-text" id="dialogue-text">
+                <div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
+              </div>
+              <div class="quick-actions" id="quick-actions"></div>
+            </div>
+          </div>
+          <div class="vn-input-area">
+            <div class="input-wrapper">
+              <button class="chat-btn" id="chat-btn" title="クレアと話す">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+              </button>
+              <textarea class="input-field" id="user-input" placeholder="クレアに話しかける..." rows="1"></textarea>
+              <button class="send-btn" id="send-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-map">
+        <div class="map-section">
+          <div class="map-header">
+            <div class="kingdom-name" id="kingdom-name">王国未設定</div>
+            <div class="kingdom-progress" id="kingdom-progress">浄化率: 0%</div>
+          </div>
+          <div class="map-container">
+            <div id="regions-container" class="regions-grid">
+              <div class="map-placeholder">
+                <div class="map-placeholder-icon">🗺️</div>
+                <p>まだ王国が作成されていません</p>
+                <p style="font-size: 0.8rem; margin-top: 0.4rem; opacity: 0.7;">クレアに話しかけて王国を作成しましょう</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-review">
+        <div class="quest-section">
+          <div class="quest-header"><h2>霧が迫る領土</h2></div>
+          <div class="quest-list" id="review-list">
+            <div class="empty-state"><div class="empty-state-icon">✨</div><p>すべての領土が安定しています</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-achievements">
+        <div class="achievement-summary">
+          <div>解除済み <span class="ach-count" id="ach-unlocked">0</span> / <span id="ach-total">0</span></div>
+          <div>🔥最長連続 <span class="ach-count" id="ach-longest-streak">0</span>日</div>
+        </div>
+        <div class="achievements-grid" id="achievements-grid"></div>
+      </div>
+      <div class="tab-content" id="tab-items">
+        <div class="items-summary">
+          <div>所持アイテム <span class="item-count" id="item-owned">0</span> / <span id="item-total">0</span></div>
+        </div>
+        <div class="items-grid" id="items-grid"></div>
+      </div>
+    </main>
+  </div>
+  <div class="modal-overlay" id="quest-modal">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title">書簡を綴る</h3><button class="modal-close" id="close-quest-modal">&times;</button></div>
+      <div class="modal-body">
+        <div class="form-group"><label class="form-label">書簡の内容</label><input type="text" class="form-input" id="quest-title" placeholder="例：EC2の基礎について"></div>
+        <div class="form-group"><label class="form-label">関連する領土</label><select class="form-select" id="quest-territory"><option value="">選択してください</option></select></div>
+        <div class="form-group"><label class="form-label">記述時間（分）</label><input type="number" class="form-input" id="quest-duration" placeholder="30" min="1"></div>
+        <div class="form-group"><label class="form-label">メモ（任意）</label><textarea class="form-input" id="quest-memo" placeholder="例：S3のバケットポリシーとIAMポリシーの違いが重要" rows="3" style="resize: vertical;"></textarea></div>
+      </div>
+      <div class="modal-footer"><button class="btn-secondary" id="cancel-quest">キャンセル</button><button class="btn-primary" id="save-quest">綴る</button></div>
+    </div>
+  </div>
+  <div class="modal-overlay" id="test-modal">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title">篝火に焚べる</h3><button class="modal-close" id="close-test-modal">&times;</button></div>
+      <div class="modal-body">
+        <div class="form-group"><label class="form-label">対象の領土</label><select class="form-select" id="test-territory"><option value="">選択してください</option></select></div>
+        <div class="form-group"><label class="form-label">浄化度（%）</label><input type="number" class="form-input" id="test-score" placeholder="85" min="0" max="100"></div>
+        <div class="form-group"><label class="form-label">メモ（任意）</label><input type="text" class="form-input" id="test-note" placeholder="例：EBSのスナップショットが弱い"></div>
+      </div>
+      <div class="modal-footer"><button class="btn-secondary" id="cancel-test">キャンセル</button><button class="btn-primary" id="save-test">焚べる</button></div>
+    </div>
+  </div>
+  <div class="modal-overlay" id="territory-modal">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title" id="territory-modal-title">領土詳細</h3><button class="modal-close" id="close-territory-modal">&times;</button></div>
+      <div class="modal-body">
+        <div class="territory-detail-status" id="territory-detail-status"></div>
+        <div class="territory-detail-stats" id="territory-detail-stats"></div>
+        <div class="territory-detail-section">
+          <div class="territory-detail-label">📜 書簡の記録</div>
+          <div class="territory-history-list" id="territory-quest-list"></div>
+        </div>
+        <div class="territory-detail-section">
+          <div class="territory-detail-label">🔥 献火の記録</div>
+          <div class="territory-history-list" id="territory-history-list"></div>
+        </div>
+        <div class="territory-detail-section">
+          <div class="territory-detail-label">📝 メモ</div>
+          <textarea class="form-input territory-memo" id="territory-memo" placeholder="この領土についてのメモ..." rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="close-territory-detail">閉じる</button>
+        <button class="btn-primary" id="save-territory-memo">メモを保存</button>
+      </div>
+      <div class="territory-detail-actions" id="territory-detail-actions"></div>
+    </div>
+  </div>
+  <div class="modal-overlay" id="chat-menu-modal">
+    <div class="modal chat-menu-modal">
+      <div class="modal-header"><h3 class="modal-title">クレアと話す</h3><button class="modal-close" id="close-chat-menu">&times;</button></div>
+      <div class="modal-body chat-menu-body">
+        <button class="chat-menu-item" data-chat-type="encourage"><span class="chat-menu-icon">💪</span><span class="chat-menu-label">励ましてもらう</span></button>
+        <button class="chat-menu-item" data-chat-type="comfort"><span class="chat-menu-icon">🙏</span><span class="chat-menu-label">労ってもらう</span></button>
+        <button class="chat-menu-item" data-chat-type="appreciate"><span class="chat-menu-icon">✨</span><span class="chat-menu-label">クレアを労う</span></button>
+        <button class="chat-menu-item" data-chat-type="advice"><span class="chat-menu-icon">📖</span><span class="chat-menu-label">学習のアドバイス</span></button>
+        <button class="chat-menu-item" data-chat-type="chat"><span class="chat-menu-icon">💬</span><span class="chat-menu-label">雑談する</span></button>
+      </div>
+    </div>
+  </div>
+  <div class="modal-overlay" id="condition-modal">
+    <div class="modal condition-modal">
+      <div class="modal-header"><h3 class="modal-title">体調の報告</h3><button class="modal-close" id="close-condition-modal">&times;</button></div>
+      <div class="modal-body condition-modal-body">
+        <div class="cond-section">
+          <div class="cond-label">今の体調は？</div>
+          <div class="cond-level-group" id="cond-level-group">
+            <button class="cond-level-btn" data-level="1"><span class="cond-level-emoji">😵</span><span class="cond-level-text">最悪</span></button>
+            <button class="cond-level-btn" data-level="2"><span class="cond-level-emoji">😔</span><span class="cond-level-text">悪い</span></button>
+            <button class="cond-level-btn" data-level="3"><span class="cond-level-emoji">😐</span><span class="cond-level-text">普通</span></button>
+            <button class="cond-level-btn" data-level="4"><span class="cond-level-emoji">😊</span><span class="cond-level-text">良い</span></button>
+            <button class="cond-level-btn" data-level="5"><span class="cond-level-emoji">😄</span><span class="cond-level-text">絶好調</span></button>
+          </div>
+        </div>
+        <div class="cond-section">
+          <div class="cond-label">症状タグ（複数選択可）</div>
+          <div class="cond-tags" id="cond-tags">
+            <button class="cond-tag" data-tag="headache">🤕 頭痛</button>
+            <button class="cond-tag" data-tag="sleepy">😪 眠気</button>
+            <button class="cond-tag" data-tag="stiff">💪 肩こり</button>
+            <button class="cond-tag" data-tag="eyestrain">👁️ 目の疲れ</button>
+            <button class="cond-tag" data-tag="fatigue">🥱 だるさ</button>
+            <button class="cond-tag" data-tag="stomach">🤢 胃腸の不調</button>
+            <button class="cond-tag" data-tag="stress">😰 ストレス</button>
+            <button class="cond-tag" data-tag="unfocused">🌀 集中力低下</button>
+          </div>
+        </div>
+        <div class="cond-section cond-row-group">
+          <div class="cond-row-item">
+            <div class="cond-label">睡眠時間</div>
+            <div class="cond-input-row"><input type="number" class="form-input cond-num" id="cond-sleep" placeholder="7" min="0" max="24" step="0.5"><span class="cond-unit">時間</span></div>
+          </div>
+          <div class="cond-row-item">
+            <div class="cond-label">カフェイン</div>
+            <div class="cond-input-row"><input type="number" class="form-input cond-num" id="cond-caffeine" placeholder="2" min="0" max="20"><span class="cond-unit">杯</span></div>
+          </div>
+        </div>
+        <div class="cond-section">
+          <div class="cond-label">食事</div>
+          <div class="cond-meal-group" id="cond-meals">
+            <label class="cond-meal"><input type="checkbox" id="cond-meal-b" value="breakfast"><span>朝食</span></label>
+            <label class="cond-meal"><input type="checkbox" id="cond-meal-l" value="lunch"><span>昼食</span></label>
+            <label class="cond-meal"><input type="checkbox" id="cond-meal-d" value="dinner"><span>夕食</span></label>
+          </div>
+        </div>
+        <div class="cond-section cond-row-group">
+          <div class="cond-row-item">
+            <div class="cond-label">気温</div>
+            <div class="cond-input-row"><input type="number" class="form-input cond-num" id="cond-temp" placeholder="20" step="0.1"><span class="cond-unit">℃</span></div>
+          </div>
+          <div class="cond-row-item">
+            <div class="cond-label">気圧</div>
+            <div class="cond-input-row"><input type="number" class="form-input cond-num" id="cond-pressure" placeholder="1013" step="0.1"><span class="cond-unit">hPa</span></div>
+          </div>
+        </div>
+        <div class="cond-section">
+          <div class="cond-label">メモ（任意）</div>
+          <input type="text" class="form-input" id="cond-note" placeholder="例：薬を飲んだ、運動した">
+        </div>
+      </div>
+      <div class="modal-footer"><button class="btn-secondary" id="cancel-condition">キャンセル</button><button class="btn-primary" id="save-condition">報告する</button></div>
+    </div>
+  </div>
+  <div class="modal-overlay" id="item-detail-modal">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title" id="item-modal-title">アイテム詳細</h3><button class="modal-close" id="close-item-modal">&times;</button></div>
+      <div class="modal-body">
+        <div class="item-detail-icon" id="item-detail-icon"></div>
+        <div class="item-detail-name" id="item-detail-name"></div>
+        <div class="item-detail-type" id="item-detail-type"></div>
+        <div class="item-detail-desc" id="item-detail-desc"></div>
+        <div class="item-detail-lore" id="item-detail-lore"></div>
+        <div class="item-detail-date" id="item-detail-date"></div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-overlay" id="sync-modal">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title">☁️ クラウド同期</h3><button class="modal-close" id="close-sync-modal">&times;</button></div>
+      <div class="modal-body">
+        <div class="sync-section-label">接続状態</div>
+        <div class="sync-status-text" id="sync-connection-status">未接続</div>
+
+        <div class="sync-section-label">Firebase設定（JSON）</div>
+        <textarea class="sync-config-area" id="sync-config-input" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","appId":"..."}'></textarea>
+        <div class="sync-hint">※ Firebaseコンソールのプロジェクト設定からコピー</div>
+
+        <div class="sync-section-label">同期ID</div>
+        <input type="text" class="sync-id-input" id="sync-id-input" placeholder="例: hayato-rekingdom">
+        <div class="sync-hint">※ 両方の端末で同じIDを入力してください</div>
+
+        <div class="sync-actions">
+          <button id="sync-test-btn">接続テスト</button>
+          <button id="sync-save-config-btn">設定を保存</button>
+        </div>
+
+        <div class="sync-section-label">同期操作</div>
+        <div class="sync-actions">
+          <button id="sync-upload-btn" disabled>☁️↑ アップロード</button>
+          <button id="sync-download-btn" disabled>☁️↓ ダウンロード</button>
+        </div>
+
+        <label class="sync-toggle"><input type="checkbox" id="sync-auto-toggle"> 自動同期（保存時に自動アップロード）</label>
+
+        <div class="sync-status-text" id="sync-last-sync">最終同期: なし</div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-overlay" id="study-modal">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title" id="study-modal-title">書簡の対象を選択</h3><button class="modal-close" id="close-study-modal">&times;</button></div>
+      <div class="modal-body">
+        <div class="study-step active" id="study-step-territory">
+          <div class="form-group">
+            <label class="form-label">書簡の対象領土</label>
+            <select class="form-select" id="study-territory"><option value="">選択してください</option></select>
+          </div>
+        </div>
+        <div class="study-step" id="study-step-mode">
+          <div class="mode-select-grid">
+            <button class="mode-option" data-mode="pomodoro">
+              <span class="mode-icon">🍅</span>
+              <div class="mode-info"><div class="mode-name">ポモドーロ</div><div class="mode-desc">25分集中＋5分休憩</div></div>
+            </button>
+            <button class="mode-option" data-mode="free">
+              <span class="mode-icon">⏱️</span>
+              <div class="mode-info"><div class="mode-name">時間無制限</div><div class="mode-desc">自分のペースで綴る</div></div>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancel-study">キャンセル</button>
+        <button class="btn-primary" id="study-next" style="display:none;">次へ</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    const AppState = { kingdom: null, regions: [], territories: [], quests: [], testHistory: [], territoryMemos: {}, conditionLogs: [], currentExpression: 'normal', currentTerritoryId: null, streak: { current: 0, longest: 0, lastStudyDate: null, titles: [] }, achievements: {}, items: {} };
+    
+    // 外部ファイルから表情とセリフを参照
+    const CLAIRE_EXPRESSIONS = CLAIRE_DIALOGUES.expressions;
+    const CLAIRE_CONVERSATIONS = CLAIRE_DIALOGUES.conversations;
+    const CLAIRE_SYSTEM = CLAIRE_DIALOGUES.system;
+    const CLAIRE_EVENTS = CLAIRE_DIALOGUES.events;
+    const CLAIRE_TIMER_ENCOURAGEMENT = CLAIRE_DIALOGUES.timerEncouragement;
+    const CLAIRE_TIMER_PAUSED = CLAIRE_DIALOGUES.timerPaused;
+    const CLAIRE_TIMER_RESUMED = CLAIRE_DIALOGUES.timerResumed;
+
+    // タイマー状態
+    const TimerState = {
+      active: false,
+      paused: false,
+      mode: null,       // 'pomodoro' or 'free'
+      phase: null,       // 'work' or 'break'
+      territoryId: null,
+      territoryName: '',
+      remaining: 0,
+      elapsed: 0,
+      intervalId: null,
+      totalStudyMinutes: 0
+    };
+
+    // テンプレート変数を展開するヘルパー
+    function expandTemplate(template, vars = {}) {
+      const result = { text: template.text, expression: template.expression };
+      if (template.actions) result.actions = template.actions;
+      Object.entries(vars).forEach(([key, value]) => {
+        result.text = result.text.replace(new RegExp('\\{' + key + '\\}', 'g'), value);
+      });
+      return result;
+    }
+    
+    const elements = {
+      claireSprite: document.getElementById('claire-sprite'),
+      dialogueText: document.getElementById('dialogue-text'),
+      quickActions: document.getElementById('quick-actions'),
+      userInput: document.getElementById('user-input'),
+      sendBtn: document.getElementById('send-btn'),
+      regionsContainer: document.getElementById('regions-container'),
+      kingdomName: document.getElementById('kingdom-name'),
+      kingdomProgress: document.getElementById('kingdom-progress'),
+      reviewList: document.getElementById('review-list'),
+      totalQuests: document.getElementById('total-quests'),
+      conqueredTerritories: document.getElementById('conquered-territories'),
+      totalTerritories: document.getElementById('total-territories'),
+      questModal: document.getElementById('quest-modal'),
+      testModal: document.getElementById('test-modal'),
+      reviewNotification: document.getElementById('review-notification'),
+      vnBackground: document.getElementById('vn-background'),
+      territoryModal: document.getElementById('territory-modal'),
+      territoryModalTitle: document.getElementById('territory-modal-title'),
+      territoryDetailStatus: document.getElementById('territory-detail-status'),
+      territoryHistoryList: document.getElementById('territory-history-list'),
+      territoryQuestList: document.getElementById('territory-quest-list'),
+      territoryDetailStats: document.getElementById('territory-detail-stats'),
+      territoryDetailActions: document.getElementById('territory-detail-actions'),
+      territoryMemo: document.getElementById('territory-memo'),
+      chatMenuModal: document.getElementById('chat-menu-modal'),
+      studyModal: document.getElementById('study-modal'),
+      studyModalTitle: document.getElementById('study-modal-title'),
+      studyTerritory: document.getElementById('study-territory'),
+      studyNext: document.getElementById('study-next'),
+      studyStepTerritory: document.getElementById('study-step-territory'),
+      studyStepMode: document.getElementById('study-step-mode'),
+      timerOverlay: document.getElementById('timer-overlay'),
+      timerTerritory: document.getElementById('timer-territory'),
+      timerPhase: document.getElementById('timer-phase'),
+      timerTime: document.getElementById('timer-time'),
+      timerPause: document.getElementById('timer-pause'),
+      timerStop: document.getElementById('timer-stop'),
+      streakDisplay: document.getElementById('streak-display'),
+      streakCount: document.getElementById('streak-count')
+    };
+
+    const BACKGROUNDS = {
+      day: 'images/bg/day.png',
+      evening: 'images/bg/evening.png',
+      night: 'images/bg/night.png',
+      altar: 'images/bg/altar.png',
+      library_day: 'images/bg/library_day.png',
+      library_evening: 'images/bg/library_evening.png',
+      library_night: 'images/bg/library_night.png'
+    };
+
+    function init() {
+      loadState();
+      setupEventListeners();
+      setupTabNavigation();
+      setTimeBasedBackground();
+      processStreakOnInit();
+      // 初回起動時：記憶の灯筆を自動入手
+      grantItem('memory_pen');
+      updateUI();
+      checkReviewAlerts();
+      // 起動時に既存データで解除可能な実績をサイレントチェック
+      ACHIEVEMENTS.forEach(ach => { if (!AppState.achievements[ach.id] && ach.check()) { AppState.achievements[ach.id] = { unlockedAt: new Date().toISOString() }; } });
+      saveState(); renderAchievements();
+      // クラウド同期の自動接続
+      SyncManager.autoConnect();
+      setupSplashScreen();
+    }
+
+    function setupSplashScreen() {
+      const splash = document.getElementById('splash-screen');
+      const idleImg = document.getElementById('splash-idle');
+      const noticeImg = document.getElementById('splash-notice');
+      const hint = document.getElementById('splash-hint');
+      let clicked = false;
+
+      // 時間帯に応じたスプラッシュ画像を選択（JST基準、背景と統一）
+      const now = new Date();
+      const jstTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+      const hour = jstTime.getHours();
+      const prefix = 'images/chara/claire/idle_desk';
+      let suffix = '';
+      if (hour >= 15 && hour < 18) suffix = '_evening';
+      else if (hour >= 18 || hour < 6) suffix = '_night';
+      idleImg.src = prefix + suffix + '.png';
+      noticeImg.src = prefix + '_notice' + suffix + '.png';
+
+      splash.addEventListener('click', () => {
+        if (clicked) return;
+        clicked = true;
+        hint.style.display = 'none';
+        // 差分に切り替え
+        idleImg.classList.add('hidden');
+        noticeImg.classList.remove('hidden');
+        // 1秒後にメイン画面へ遷移
+        setTimeout(() => {
+          splash.classList.add('fade-out');
+          setTimeout(() => {
+            splash.style.display = 'none';
+            const g = getInitialGreeting();
+            showDialogue(g.text, g.expression, g.actions);
+          }, 800);
+        }, 1000);
+      });
+    }
+
+    function setTimeBasedBackground() {
+      const now = new Date();
+      const jstTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+      const hour = jstTime.getHours();
+      let bgKey;
+      if (hour >= 6 && hour < 15) {
+        bgKey = 'day';
+      } else if (hour >= 15 && hour < 18) {
+        bgKey = 'evening';
+      } else {
+        bgKey = 'night';
+      }
+      elements.vnBackground.style.backgroundImage = 'url(' + BACKGROUNDS[bgKey] + ')';
+    }
+
+    function setAltarBackground() {
+      elements.vnBackground.style.backgroundImage = 'url(' + BACKGROUNDS.altar + ')';
+    }
+
+    function setLibraryBackground() {
+      const now = new Date();
+      const jstTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+      const hour = jstTime.getHours();
+      let bgKey;
+      if (hour >= 6 && hour < 15) { bgKey = 'library_day'; }
+      else if (hour >= 15 && hour < 18) { bgKey = 'library_evening'; }
+      else { bgKey = 'library_night'; }
+      elements.vnBackground.style.backgroundImage = 'url(' + BACKGROUNDS[bgKey] + ')';
+    }
+
+    function restoreBackground() {
+      setTimeBasedBackground();
+    }
+
+    function playLibraryTransition(callback) {
+      const blackout = document.getElementById('scene-blackout');
+      const sprite = elements.claireSprite;
+      const bg = elements.vnBackground;
+
+      // セリフ・ボタンを消す
+      elements.dialogueText.innerHTML = '';
+      elements.quickActions.innerHTML = '';
+
+      // Step 1: クレアフェードアウト (0.5s)
+      sprite.classList.add('scene-hide');
+
+      setTimeout(() => {
+        // Step 2: 暗転開始 (0.6s)
+        blackout.classList.add('active');
+
+        setTimeout(() => {
+          // Step 3: 暗転中に背景を図書室に差し替え
+          setLibraryBackground();
+
+          setTimeout(() => {
+            // Step 4: 暗転解除 (0.6s)
+            blackout.classList.remove('active');
+
+            setTimeout(() => {
+              // Step 5: クレアフェードイン
+              sprite.classList.remove('scene-hide');
+
+              setTimeout(() => {
+                // Step 6: 完了コールバック
+                if (callback) callback();
+              }, 500);
+            }, 300);
+          }, 1000);
+        }, 600);
+      }, 500);
+    }
+
+    function getStudySpriteUrl() {
+      const now = new Date();
+      const jst = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+      const hour = jst.getHours();
+      if (hour >= 6 && hour < 15) return 'images/chara/claire/study.png';
+      if (hour >= 15 && hour < 18) return 'images/chara/claire/study_evening.png';
+      return 'images/chara/claire/study_night.png';
+    }
+
+    function setExpression(expression) {
+      const sprite = elements.claireSprite;
+      // タイマー稼働中は学習スプライトを使用
+      if (TimerState.active) {
+        const studyUrl = getStudySpriteUrl();
+        if (sprite.src.endsWith(studyUrl)) return;
+        sprite.classList.add('changing');
+        setTimeout(() => {
+          sprite.src = studyUrl;
+          AppState.currentExpression = '__study__';
+          setTimeout(() => sprite.classList.remove('changing'), 50);
+        }, 150);
+        return;
+      }
+      if (AppState.currentExpression === expression) return;
+      sprite.classList.add('changing');
+      setTimeout(() => {
+        sprite.src = CLAIRE_EXPRESSIONS[expression] || CLAIRE_EXPRESSIONS.normal;
+        AppState.currentExpression = expression;
+        setTimeout(() => sprite.classList.remove('changing'), 50);
+      }, 150);
+    }
+
+    function showDialogue(text, expression = 'normal', actions = []) {
+      setExpression(expression);
+      elements.dialogueText.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+      elements.quickActions.innerHTML = '';
+      setTimeout(() => {
+        const paragraphs = text.split('\n').filter(p => p.trim());
+        elements.dialogueText.innerHTML = paragraphs.map(p => '<p>' + p + '</p>').join('');
+        if (actions && actions.length > 0) {
+          elements.quickActions.innerHTML = actions.map(a => '<button class="quick-action-btn" data-value="' + a.value + '">' + a.label + '</button>').join('');
+          elements.quickActions.querySelectorAll('.quick-action-btn').forEach(btn => {
+            btn.addEventListener('click', () => { if (btn.dataset.value) { elements.userInput.value = btn.dataset.value; handleSendMessage(); } });
+          });
+        }
+      }, 600);
+    }
+
+    // === 書簡リスト表示（クレアのセリフ欄内） ===
+
+    const QUEST_PAGE_SIZE = 5;
+
+    function showQuestListInDialogue(page) {
+      page = page || 0;
+      window._questListPage = page;
+      setExpression('normal');
+      elements.quickActions.innerHTML = '';
+
+      const quests = AppState.quests.slice().sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+      const totalPages = Math.max(1, Math.ceil(quests.length / QUEST_PAGE_SIZE));
+      if (page >= totalPages) page = totalPages - 1;
+      if (page < 0) page = 0;
+
+      const headerText = quests.length === 0
+        ? '<p>これまでに綴られた書簡はまだございません。</p>'
+        : '<p>これまでに綴られた書簡でございます。（全' + quests.length + '通）</p>';
+
+      let listHtml;
+      if (quests.length === 0) {
+        listHtml = '<div class="dialogue-quest-empty">📜 まだ書簡がありません<br><span style="font-size:0.7rem;">書簡を綴ったり、手動登録すると書簡が増えていきます</span></div>';
+      } else {
+        const pageQuests = quests.slice(page * QUEST_PAGE_SIZE, (page + 1) * QUEST_PAGE_SIZE);
+        listHtml = '<div class="dialogue-quest-list">' + pageQuests.map(q => {
+          const territory = AppState.territories.find(t => t.id === q.territoryId);
+          const tName = territory ? territory.name : '—';
+          const dateStr = new Date(q.completedAt).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' });
+          const durStr = q.duration ? q.duration + '分' : '';
+          const hasMemo = q.memo ? ' style="cursor:pointer;"' : ' style="cursor:pointer;"';
+          return '<div class="dialogue-quest-card" data-quest-id="' + q.id + '">' +
+            '<div class="dqc-icon">📜</div>' +
+            '<div class="dqc-body">' +
+              '<div class="dqc-title">' + q.title + '</div>' +
+              '<div class="dqc-meta">' + tName + '　' + dateStr + (durStr ? '　' + durStr : '') + '</div>' +
+            '</div>' +
+            '<div class="dqc-icon" style="opacity:0.3;font-size:0.8rem;">▶</div>' +
+          '</div>';
+        }).join('') + '</div>';
+
+        if (totalPages > 1) {
+          listHtml += '<div class="dialogue-quest-nav">' +
+            '<button id="quest-page-prev" ' + (page <= 0 ? 'disabled' : '') + '>◀ 前</button>' +
+            '<span>' + (page + 1) + ' / ' + totalPages + '</span>' +
+            '<button id="quest-page-next" ' + (page >= totalPages - 1 ? 'disabled' : '') + '>次 ▶</button>' +
+          '</div>';
+        }
+      }
+
+      elements.dialogueText.innerHTML = headerText + listHtml;
+
+      // カードクリックイベント
+      document.querySelectorAll('.dialogue-quest-card[data-quest-id]').forEach(card => {
+        card.addEventListener('click', () => showQuestDetailInDialogue(card.dataset.questId));
+      });
+
+      // ページネーションのイベント
+      const prevBtn = document.getElementById('quest-page-prev');
+      const nextBtn = document.getElementById('quest-page-next');
+      if (prevBtn) prevBtn.addEventListener('click', () => showQuestListInDialogue(page - 1));
+      if (nextBtn) nextBtn.addEventListener('click', () => showQuestListInDialogue(page + 1));
+
+      // アクションボタン
+      const actions = [
+        { label: '書簡を綴る', value: '書簡を綴りたい' },
+        { label: 'メインに戻る', value: 'メインに戻る' }
+      ];
+      elements.quickActions.innerHTML = actions.map(a => '<button class="quick-action-btn" data-value="' + a.value + '">' + a.label + '</button>').join('');
+      elements.quickActions.querySelectorAll('.quick-action-btn').forEach(btn => {
+        btn.addEventListener('click', () => { if (btn.dataset.value) { elements.userInput.value = btn.dataset.value; handleSendMessage(); } });
+      });
+    }
+
+    function showQuestDetailInDialogue(questId) {
+      const quest = AppState.quests.find(q => q.id === questId);
+      if (!quest) return;
+      setExpression('normal');
+      elements.quickActions.innerHTML = '';
+
+      const territory = AppState.territories.find(t => t.id === quest.territoryId);
+      const tName = territory ? territory.name : '未指定';
+      const dateStr = new Date(quest.completedAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
+      const timeStr = new Date(quest.completedAt).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+      const durStr = quest.duration ? quest.duration + '分' : '—';
+
+      let detailHtml = '<div class="dialogue-quest-detail">' +
+        '<div class="dqd-title">📜 ' + quest.title + '</div>' +
+        '<div class="dqd-row"><span class="dqd-label">領土</span><span class="dqd-value">' + tName + '</span></div>' +
+        '<div class="dqd-row"><span class="dqd-label">記述時間</span><span class="dqd-value">' + durStr + '</span></div>' +
+        '<div class="dqd-row"><span class="dqd-label">日時</span><span class="dqd-value">' + dateStr + ' ' + timeStr + '</span></div>';
+
+      if (quest.memo) {
+        detailHtml += '<div class="dqd-memo">' + quest.memo.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+      } else {
+        detailHtml += '<div class="dqd-no-memo">メモはありません</div>';
+      }
+
+      detailHtml += '</div>';
+
+      elements.dialogueText.innerHTML = '<p>この書簡の詳細でございます。</p>' + detailHtml;
+
+      // アクションボタン
+      const actions = [
+        { label: '◀ 書簡一覧に戻る', value: '__QUEST_LIST_BACK__' },
+        { label: 'メインに戻る', value: 'メインに戻る' }
+      ];
+      elements.quickActions.innerHTML = actions.map(a => '<button class="quick-action-btn" data-value="' + a.value + '">' + a.label + '</button>').join('');
+      elements.quickActions.querySelectorAll('.quick-action-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (btn.dataset.value === '__QUEST_LIST_BACK__') {
+            showQuestListInDialogue(window._questListPage || 0);
+          } else if (btn.dataset.value) {
+            elements.userInput.value = btn.dataset.value;
+            handleSendMessage();
+          }
+        });
+      });
+    }
+
+    function getDailyLine() {
+      const now = new Date();
+      const jst = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+      const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+      const dayKey = dayNames[jst.getDay()];
+      const lines = CLAIRE_DIALOGUES.dailyGreetings[dayKey] || [];
+      // 日付シードで同じ日は同じセリフ
+      const dateSeed = jst.getFullYear() * 10000 + (jst.getMonth() + 1) * 100 + jst.getDate();
+      return lines.length > 0 ? lines[dateSeed % lines.length] : '';
+    }
+
+    function getStreakDailyLine() {
+      const streak = AppState.streak.current || 0;
+      const entries = CLAIRE_DIALOGUES.streakDailyLines || [];
+      const match = entries.find(e => streak >= e.min && streak <= e.max);
+      if (!match) return '';
+      const now = new Date();
+      const jst = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+      const dateSeed = jst.getFullYear() * 10000 + (jst.getMonth() + 1) * 100 + jst.getDate();
+      return match.lines[dateSeed % match.lines.length];
+    }
+
+    function getInitialGreeting() {
+      if (!AppState.kingdom) {
+        return expandTemplate(CLAIRE_SYSTEM.firstGreeting);
+      }
+      const streakStatus = checkStreakStatus();
+      // ストリークが途切れた場合（前回2日以上の連続があった場合のみ）
+      if (streakStatus === 'broken' && AppState.streak.longest >= 2) {
+        const base = expandTemplate(CLAIRE_EVENTS.streakBroken);
+        const daily = getDailyLine();
+        if (daily) { base.text = base.text + '\n\n' + daily; }
+        return base;
+      }
+      // ストリーク継続中（昨日も学習した）
+      if (streakStatus === 'continued' && AppState.streak.current >= 2) {
+        const base = expandTemplate(CLAIRE_EVENTS.streakContinued, { streak: AppState.streak.current, kingdomName: AppState.kingdom.name, progress: calculateProgress() });
+        const streakLine = getStreakDailyLine();
+        const daily = streakLine || getDailyLine();
+        if (daily) { base.text = base.text + '\n\n' + daily; }
+        return base;
+      }
+      const base = expandTemplate(CLAIRE_SYSTEM.normalGreeting, { kingdomName: AppState.kingdom.name, progress: calculateProgress() });
+      const daily = getDailyLine();
+      if (daily) { base.text = base.text + '\n\n' + daily; }
+      return base;
+    }
+
+    function setupEventListeners() {
+      elements.sendBtn.addEventListener('click', handleSendMessage);
+      elements.userInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } });
+      elements.userInput.addEventListener('input', () => { elements.userInput.style.height = 'auto'; elements.userInput.style.height = Math.min(elements.userInput.scrollHeight, 100) + 'px'; });
+      document.getElementById('close-quest-modal').addEventListener('click', () => closeModalAndRestore('quest-modal'));
+      document.getElementById('cancel-quest').addEventListener('click', () => closeModalAndRestore('quest-modal'));
+      document.getElementById('save-quest').addEventListener('click', saveQuest);
+      document.getElementById('close-test-modal').addEventListener('click', () => closeModalAndRestore('test-modal'));
+      document.getElementById('cancel-test').addEventListener('click', () => closeModalAndRestore('test-modal'));
+      document.getElementById('save-test').addEventListener('click', saveTestResult);
+      document.getElementById('close-territory-modal').addEventListener('click', () => elements.territoryModal.classList.remove('active'));
+      document.getElementById('close-territory-detail').addEventListener('click', () => elements.territoryModal.classList.remove('active'));
+      document.getElementById('save-territory-memo').addEventListener('click', saveTerritoryMemo);
+      // 会話メニュー
+      document.getElementById('chat-btn').addEventListener('click', () => elements.chatMenuModal.classList.add('active'));
+      document.getElementById('close-chat-menu').addEventListener('click', () => elements.chatMenuModal.classList.remove('active'));
+      document.getElementById('close-item-modal').addEventListener('click', () => document.getElementById('item-detail-modal').classList.remove('active'));
+
+      // 体調モーダル
+      document.getElementById('close-condition-modal').addEventListener('click', () => document.getElementById('condition-modal').classList.remove('active'));
+      document.getElementById('cancel-condition').addEventListener('click', () => document.getElementById('condition-modal').classList.remove('active'));
+      document.getElementById('save-condition').addEventListener('click', saveCondition);
+      document.querySelectorAll('.cond-level-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.cond-level-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        });
+      });
+      document.querySelectorAll('.cond-tag').forEach(btn => {
+        btn.addEventListener('click', () => btn.classList.toggle('active'));
+      });
+
+      // 同期モーダル
+      document.getElementById('sync-btn').addEventListener('click', () => {
+        const cfg = SyncManager.loadConfig();
+        if (cfg) {
+          document.getElementById('sync-config-input').value = cfg.firebaseConfig || '';
+          document.getElementById('sync-id-input').value = cfg.syncId || '';
+          document.getElementById('sync-auto-toggle').checked = cfg.autoSync || false;
+        }
+        SyncManager.updateConnectionStatusUI();
+        SyncManager.updateLastSyncUI();
+        const connected = SyncManager.isConnected;
+        document.getElementById('sync-upload-btn').disabled = !connected;
+        document.getElementById('sync-download-btn').disabled = !connected;
+        document.getElementById('sync-modal').classList.add('active');
+      });
+      document.getElementById('close-sync-modal').addEventListener('click', () => document.getElementById('sync-modal').classList.remove('active'));
+      document.getElementById('sync-test-btn').addEventListener('click', async () => {
+        const configStr = document.getElementById('sync-config-input').value.trim();
+        const syncId = document.getElementById('sync-id-input').value.trim();
+        if (!configStr || !syncId) { alert('Firebase設定と同期IDを入力してください。'); return; }
+        try {
+          SyncManager.initFirebase(configStr);
+          SyncManager.syncId = syncId;
+          await SyncManager.testConnection();
+          SyncManager.updateConnectionStatusUI();
+          document.getElementById('sync-upload-btn').disabled = false;
+          document.getElementById('sync-download-btn').disabled = false;
+          // 接続成功時に自動保存
+          const autoSync = document.getElementById('sync-auto-toggle').checked;
+          SyncManager.autoSync = autoSync;
+          SyncManager.saveConfig(configStr, syncId, autoSync);
+          alert('接続成功！設定を保存しました。');
+        } catch(e) { SyncManager.isConnected = false; SyncManager.updateStatusDot('error'); SyncManager.updateConnectionStatusUI(); alert('接続失敗: ' + e.message); }
+      });
+      document.getElementById('sync-save-config-btn').addEventListener('click', () => {
+        const configStr = document.getElementById('sync-config-input').value.trim();
+        const syncId = document.getElementById('sync-id-input').value.trim();
+        const autoSync = document.getElementById('sync-auto-toggle').checked;
+        if (!configStr || !syncId) { alert('Firebase設定と同期IDを入力してください。'); return; }
+        SyncManager.syncId = syncId;
+        SyncManager.autoSync = autoSync;
+        SyncManager.saveConfig(configStr, syncId, autoSync);
+        alert('設定を保存しました。');
+      });
+      document.getElementById('sync-upload-btn').addEventListener('click', () => SyncManager.upload(false));
+      document.getElementById('sync-download-btn').addEventListener('click', () => {
+        if (confirm('クラウドのデータでローカルを上書きします。\nよろしいですか？')) { SyncManager.download(); }
+      });
+      document.getElementById('sync-auto-toggle').addEventListener('change', (e) => { SyncManager.autoSync = e.target.checked; });
+      document.querySelectorAll('.chat-menu-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const chatType = item.dataset.chatType;
+          elements.chatMenuModal.classList.remove('active');
+          handleClaireChat(chatType);
+        });
+      });
+      // 学習開始モーダル
+      document.getElementById('close-study-modal').addEventListener('click', () => closeStudyModal());
+      document.getElementById('cancel-study').addEventListener('click', () => closeStudyModal());
+      elements.studyTerritory.addEventListener('change', () => {
+        elements.studyNext.style.display = elements.studyTerritory.value ? '' : 'none';
+      });
+      elements.studyNext.addEventListener('click', () => {
+        const territoryId = elements.studyTerritory.value;
+        elements.studyModal.classList.remove('active');
+        showLibraryConfirmation(territoryId);
+      });
+      document.querySelectorAll('.mode-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mode = btn.dataset.mode;
+          elements.studyModal.classList.remove('active');
+          startStudyTimer(window._pendingStudyTerritoryId, mode);
+        });
+      });
+      // タイマー操作
+      elements.timerPause.addEventListener('click', toggleTimerPause);
+      elements.timerStop.addEventListener('click', stopTimer);
+    }
+
+    function handleClaireChat(chatType) {
+      const conversations = CLAIRE_CONVERSATIONS[chatType];
+      if (!conversations || conversations.length === 0) return;
+      const selected = conversations[Math.floor(Math.random() * conversations.length)];
+      if (selected.pages) {
+        showConversationPages(selected.pages, 0);
+      } else {
+        showDialogue(selected.text, selected.expression, [{ label: '戻る', value: 'メインに戻る' }]);
+      }
+    }
+
+    function showConversationPages(pages, index) {
+      const page = pages[index];
+      const isLast = index >= pages.length - 1;
+      if (isLast) {
+        showDialogue(page.text, page.expression, [{ label: '戻る', value: 'メインに戻る' }]);
+      } else {
+        showDialogue(page.text, page.expression, [{ label: '▶ 次へ', value: '__NEXT_PAGE__' }]);
+        // 次ページハンドラーを一時保存
+        window._pendingPages = pages;
+        window._pendingPageIndex = index + 1;
+      }
+    }
+
+    function closeModalAndRestore(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+      if (modalId === 'test-modal') { restoreBackground(); }
+      const defaultDialogue = getDefaultDialogue();
+      showDialogue(defaultDialogue.text, defaultDialogue.expression, defaultDialogue.actions);
+    }
+
+    function getTodayStudyMinutes() {
+      const today = getTodayDateStr();
+      return AppState.quests
+        .filter(q => {
+          const qDate = new Date(q.completedAt).toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' });
+          return qDate === today;
+        })
+        .reduce((sum, q) => sum + (q.duration || 0), 0);
+    }
+
+    function getDefaultDialogue() {
+      if (!AppState.kingdom) {
+        return expandTemplate(CLAIRE_SYSTEM.defaultNoKingdom);
+      }
+      // 累計学習時間による分岐
+      const todayMin = getTodayStudyMinutes();
+      const todayHours = Math.floor(todayMin / 60);
+      if (todayHours >= 1) {
+        const level = Math.min(todayHours, 6);
+        const lines = CLAIRE_SYSTEM.studyProgress[level];
+        if (lines && lines.length > 0) {
+          const seed = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' }) + '-' + level;
+          let hash = 0;
+          for (let i = 0; i < seed.length; i++) { hash = ((hash << 5) - hash) + seed.charCodeAt(i); hash |= 0; }
+          const picked = lines[Math.abs(hash) % lines.length];
+          const actions = [
+            { label: '書簡を綴る', value: '書簡を綴りたい' },
+            { label: '書簡を確認', value: '書簡を確認したい' },
+            { label: '篝火に焚べる', value: 'テストの結果を報告したい' },
+            { label: '体調を報告', value: '体調を報告したい' },
+            { label: '霧の状況を確認', value: '復習が必要な領土を教えて' }
+          ];
+          return { text: '📚 本日の学習：' + todayMin + '分\n\n' + picked.text, expression: picked.expression, actions: actions };
+        }
+      }
+      return expandTemplate(CLAIRE_SYSTEM.default);
+    }
+
+    function setupTabNavigation() {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          btn.classList.add('active');
+          document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        });
+      });
+    }
+
+    async function handleSendMessage() {
+      const content = elements.userInput.value.trim();
+      if (!content) return;
+      elements.userInput.value = '';
+      elements.userInput.style.height = 'auto';
+      // タイマー同分野続行は即時処理
+      if (content === 'TIMER_SAME') { handleTimerSame(); return; }
+      // 会話ページ送り
+      if (content === '__NEXT_PAGE__' && window._pendingPages) {
+        showConversationPages(window._pendingPages, window._pendingPageIndex);
+        return;
+      }
+      // 内部コマンド処理
+      if (handleInternalCommand(content)) { return; }
+      elements.sendBtn.disabled = true;
+      elements.dialogueText.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+      elements.quickActions.innerHTML = '';
+      setExpression('normal');
+      setTimeout(() => { const response = processUserMessage(content); if (response) { showDialogue(response.text, response.expression, response.actions); } elements.sendBtn.disabled = false; updateUI(); }, 800 + Math.random() * 400);
+    }
+
+    function processUserMessage(content) {
+      const lower = content.toLowerCase();
+      if (!AppState.kingdom && (lower.includes('aws') || lower.includes('資格') || lower.includes('王国'))) {
+        if (lower.includes('aws') || lower.includes('saa')) { return createAWSKingdom(); }
+        return { text: 'どのような知識の領域を王国として定めましょうか？', expression: 'normal', actions: [{ label: 'AWS-SAA', value: 'AWS Solutions Architect Associateで王国を作成' }] };
+      }
+      // 書簡を確認（一覧表示）- 「綴る」「記す」より先に判定
+      if ((lower.includes('書簡') && (lower.includes('確認') || lower.includes('見') || lower.includes('一覧') || lower.includes('履歴'))) || lower === '書簡') { showQuestListInDialogue(0); return null; }
+      if (lower.includes('書簡') && (lower.includes('綴') || lower.includes('記'))) { startWriteQuestFlow(); return null; }
+      if (lower.includes('学習') && (lower.includes('記録') || lower.includes('つけ'))) { startWriteQuestFlow(); return null; }
+      if (lower.includes('書簡') && lower.includes('綴りたい')) { startWriteQuestFlow(); return null; }
+      if (lower.includes('遠征') && (lower.includes('始め') || lower.includes('する') || lower.includes('開始'))) { startWriteQuestFlow(); return null; }
+      if (lower.includes('学習') && (lower.includes('始め') || lower.includes('する') || lower.includes('開始'))) { startWriteQuestFlow(); return null; }
+      if (content === 'メインに戻る') { return getDefaultDialogue(); }
+      // 体調関連
+      if (lower.includes('体調') && (lower.includes('報告') || lower.includes('記録') || lower.includes('入力'))) { openConditionModal(); return null; }
+      if (lower.includes('体調') && (lower.includes('分析') || lower.includes('振り返') || lower.includes('傾向'))) { showConditionAnalysis(); return null; }
+      if (lower.includes('体調') && (lower.includes('確認') || lower.includes('履歴') || lower.includes('見'))) { showConditionLogInDialogue(0); return null; }
+      if (lower.includes('篝火') && lower.includes('焚べ')) { elements.testModal.classList.add('active'); setAltarBackground(); return { text: '篝火に焚べるのですね。\n浄化度70%以上で霧が晴れます。', expression: 'serious', actions: [] }; }
+      if (lower.includes('テスト') && (lower.includes('結果') || lower.includes('報告'))) { elements.testModal.classList.add('active'); setAltarBackground(); return { text: '篝火に焚べるのですね。\n浄化度70%以上で霧が晴れます。', expression: 'serious', actions: [] }; }
+      if (lower.includes('復習') || lower.includes('不穏') || lower.includes('霧')) {
+        const reviewNeeded = getTerritoriesNeedingReview();
+        if (reviewNeeded.length === 0) { return { text: '現在、すべての領土の霧は静まっております。', expression: 'smile', actions: [{ label: '書簡を綴る', value: '書簡を綴りたい' }, { label: '篝火に焚べる', value: '篝火に焚べたい' }, { label: '領土を確認', value: '領土の状況を教えて' }] }; }
+        const list = reviewNeeded.slice(0, 5).map(t => '・' + t.name + '（' + t.daysSinceReview + '日前）').join('\n');
+        return { text: '以下の領土に忘却の霧が迫っております。\n' + list, expression: 'worried', actions: [].concat(reviewNeeded.slice(0, 2).map(t => ({ label: t.name + 'の書簡を綴る', value: '書簡を綴りたい' })), [{ label: '篝火に焚べる', value: '篝火に焚べたい' }]) };
+      }
+      if (lower.includes('領土') && (lower.includes('状況') || lower.includes('教えて') || lower.includes('確認'))) {
+        if (!AppState.kingdom) { return { text: 'まだ王国が作成されておりません。', expression: 'normal', actions: [{ label: 'AWS-SAAで作成', value: 'AWS Solutions Architect Associateで王国を作成' }] }; }
+        return { text: AppState.kingdom.name + 'の現状をご報告いたします。\n浄化済み領土: ' + AppState.territories.filter(t => t.conquered).length + ' / ' + AppState.territories.length + '\n浄化率: ' + calculateProgress() + '%', expression: 'normal', actions: [{ label: '書簡を綴る', value: '書簡を綴りたい' }, { label: '篝火に焚べる', value: '篝火に焚べたい' }, { label: '霧の状況を確認', value: '復習が必要な領土を教えて' }] };
+      }
+      if (AppState.kingdom) { return { text: 'ご命令をお待ちしております。', expression: 'normal', actions: [{ label: '書簡を綴る', value: '書簡を綴りたい' }, { label: '書簡を確認', value: '書簡を確認したい' }, { label: '篝火に焚べる', value: '篝火に焚べたい' }, { label: '霧の状況を確認', value: '復習が必要な領土を教えて' }] }; }
+      return { text: '王国を作成いたしましょう。', expression: 'normal', actions: [{ label: 'AWS-SAA', value: 'AWS Solutions Architect Associateで王国を作成' }] };
+    }
+
+    function createAWSKingdom() {
+      AppState.kingdom = { name: 'AWS-SAA王国', createdAt: new Date().toISOString() };
+      AppState.regions = [
+        { id: 'core', name: '主要なサービス（王都中央）' }, { id: 'compute', name: 'コンピューティング' }, { id: 'storage', name: 'ストレージ' },
+        { id: 'database', name: 'データベース' }, { id: 'management', name: 'マネジメント' }, { id: 'security', name: 'セキュリティ' },
+        { id: 'network', name: 'ネットワーク' }, { id: 'migration', name: '移行と転送' }, { id: 'integration', name: 'アプリケーション統合' },
+        { id: 'analytics', name: '分析' }, { id: 'ml', name: '機械学習' }, { id: 'other', name: 'その他' }, { id: 'wellarch', name: 'Well-Architected' }
+      ];
+      AppState.territories = [
+        { id: 'ec2', name: 'EC2', regionId: 'core', conquered: false, prosperity: 0, lastReview: null },
+        { id: 's3', name: 'S3', regionId: 'core', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'vpc', name: 'VPC', regionId: 'core', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'iam', name: 'IAM/Organizations', regionId: 'core', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'elb', name: 'ELB/Auto Scaling', regionId: 'core', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'lambda', name: 'Lambda/API Gateway', regionId: 'compute', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'ecs', name: 'ECS/Fargate/EKS', regionId: 'compute', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'ebs', name: 'EBS', regionId: 'storage', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'efs', name: 'EFS', regionId: 'storage', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'fsx', name: 'FSx', regionId: 'storage', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'rds', name: 'RDS/Aurora', regionId: 'database', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'dynamodb', name: 'DynamoDB', regionId: 'database', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'elasticache', name: 'ElastiCache', regionId: 'database', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'cloudwatch', name: 'CloudWatch', regionId: 'management', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'cloudtrail', name: 'CloudTrail', regionId: 'management', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'cloudformation', name: 'CloudFormation', regionId: 'management', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'waf', name: 'WAF/Shield', regionId: 'security', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'kms', name: 'KMS/CloudHSM', regionId: 'security', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'route53', name: 'Route 53', regionId: 'network', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'cloudfront', name: 'CloudFront', regionId: 'network', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'directconnect', name: 'Direct Connect/VPN', regionId: 'network', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'datasync', name: 'DataSync/Snowball', regionId: 'migration', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'sqs', name: 'SNS/SQS/MQ', regionId: 'integration', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'kinesis', name: 'Kinesis', regionId: 'analytics', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'glue', name: 'Glue/EMR', regionId: 'analytics', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'athena', name: 'Athena/QuickSight', regionId: 'analytics', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'sagemaker', name: 'SageMaker', regionId: 'ml', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'other', name: 'その他', regionId: 'other', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'reliability', name: '信頼性', regionId: 'wellarch', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'security-wa', name: 'セキュリティ', regionId: 'wellarch', conquered: false, prosperity: 0, lastReview: null },
+        { id: 'cost', name: 'コスト最適化', regionId: 'wellarch', conquered: false, prosperity: 0, lastReview: null }
+      ];
+      saveState(); updateUI();
+      setTimeout(checkAchievements, 500);
+      return expandTemplate(CLAIRE_EVENTS.kingdomCreated, { kingdomName: AppState.kingdom.name, regionCount: AppState.regions.length, territoryCount: AppState.territories.length });
+    }
+
+    function calculateProgress() { if (AppState.territories.length === 0) return 0; return Math.round((AppState.territories.filter(t => t.conquered).length / AppState.territories.length) * 100); }
+
+    function getTerritoriesNeedingReview() {
+      const now = new Date();
+      return AppState.territories.filter(t => t.conquered && t.lastReview).map(t => {
+        const daysSince = Math.floor((now - new Date(t.lastReview)) / (1000 * 60 * 60 * 24));
+        return { ...t, daysSinceReview: daysSince };
+      }).filter(t => [1, 3, 7, 14, 30].some(i => t.daysSinceReview >= i && t.daysSinceReview < i + 3)).sort((a, b) => b.daysSinceReview - a.daysSinceReview);
+    }
+
+    function updateUI() { updateStats(); updateRegionsGrid(); updateTerritorySelects(); checkReviewAlerts(); updateStreakUI(); renderAchievements(); renderItems(); }
+
+    function updateStats() {
+      elements.totalQuests.textContent = AppState.quests.length;
+      elements.conqueredTerritories.textContent = AppState.territories.filter(t => t.conquered).length;
+      elements.totalTerritories.textContent = AppState.territories.length;
+      if (AppState.kingdom) { elements.kingdomName.textContent = AppState.kingdom.name; elements.kingdomProgress.textContent = '浄化率: ' + calculateProgress() + '%'; }
+    }
+
+    function updateRegionsGrid() {
+      if (!AppState.kingdom || AppState.regions.length === 0) { elements.regionsContainer.innerHTML = '<div class="map-placeholder"><div class="map-placeholder-icon">🗺️</div><p>まだ王国が作成されていません</p></div>'; return; }
+      elements.regionsContainer.innerHTML = AppState.regions.map(region => {
+        const territories = AppState.territories.filter(t => t.regionId === region.id);
+        const conqueredCount = territories.filter(t => t.conquered).length;
+        const avgProsperity = territories.length > 0 ? Math.round(territories.reduce((sum, t) => sum + t.prosperity, 0) / territories.length) : 0;
+        return '<div class="region-card ' + (conqueredCount === territories.length ? 'conquered' : '') + '"><div class="region-header"><span class="region-name">' + region.name + '</span><span class="region-status ' + (conqueredCount === territories.length ? 'conquered' : '') + '">' + conqueredCount + '/' + territories.length + '</span></div><div class="region-territories">' + territories.map(t => '<span class="territory-tag ' + (t.conquered ? 'conquered' : '') + '" data-territory-id="' + t.id + '">' + t.name + '</span>').join('') + '</div>' + (conqueredCount > 0 ? '<div class="region-prosperity"><div class="prosperity-bar"><div class="prosperity-fill" style="width: ' + avgProsperity + '%"></div></div><span class="prosperity-value">' + avgProsperity + '%</span></div>' : '') + '</div>';
+      }).join('');
+      // 領土タグにクリックイベントを追加
+      document.querySelectorAll('.territory-tag').forEach(tag => {
+        tag.addEventListener('click', () => openTerritoryDetail(tag.dataset.territoryId));
+      });
+    }
+
+    function openTerritoryDetail(territoryId) {
+      const territory = AppState.territories.find(t => t.id === territoryId);
+      if (!territory) return;
+      AppState.currentTerritoryId = territoryId;
+      elements.territoryModalTitle.textContent = territory.name;
+
+      // ステータス表示
+      const lastReviewDate = territory.lastReview ? new Date(territory.lastReview).toLocaleDateString('ja-JP') : '未学習';
+      elements.territoryDetailStatus.innerHTML = 
+        '<div class="territory-status-row"><span class="territory-status-label">状態</span><span class="territory-status-value ' + (territory.conquered ? 'conquered' : 'unconquered') + '">' + (territory.conquered ? '浄化済み ✓' : '未浄化') + '</span></div>' +
+        '<div class="territory-status-row"><span class="territory-status-label">浄化度</span><span class="territory-status-value">' + territory.prosperity + '%</span></div>' +
+        '<div class="territory-status-row"><span class="territory-status-label">最終学習</span><span class="territory-status-value">' + lastReviewDate + '</span></div>';
+
+      // 統計情報
+      const relatedQuests = AppState.quests.filter(q => q.territoryId === territoryId);
+      const relatedTests = AppState.testHistory.filter(h => h.territoryId === territoryId);
+      const totalMinutes = relatedQuests.reduce((sum, q) => sum + (q.duration || 0), 0);
+      const avgScore = relatedTests.length > 0 ? Math.round(relatedTests.reduce((sum, h) => sum + h.score, 0) / relatedTests.length) : 0;
+      const timeStr = totalMinutes >= 60 ? Math.floor(totalMinutes / 60) + '時間' + (totalMinutes % 60 > 0 ? totalMinutes % 60 + '分' : '') : totalMinutes + '分';
+      elements.territoryDetailStats.innerHTML =
+        '<div class="td-stat"><div class="td-stat-value">' + relatedQuests.length + '</div><div class="td-stat-label">書簡数</div></div>' +
+        '<div class="td-stat"><div class="td-stat-value">' + timeStr + '</div><div class="td-stat-label">累計学習時間</div></div>' +
+        '<div class="td-stat"><div class="td-stat-value">' + (relatedTests.length > 0 ? avgScore + '%' : '—') + '</div><div class="td-stat-label">平均浄化度</div></div>';
+
+      // 書簡の記録
+      const questsSorted = relatedQuests.slice().sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+      const questsToShow = questsSorted.slice(0, 5);
+      if (questsSorted.length === 0) {
+        elements.territoryQuestList.innerHTML = '<div class="territory-history-empty">まだ書簡がありません</div>';
+      } else {
+        let questHtml = questsToShow.map(q => {
+          const dateStr = new Date(q.completedAt).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' });
+          const durStr = q.duration ? q.duration + '分' : '';
+          const hasMemo = q.memo ? '📝' : '';
+          return '<div class="territory-quest-item" data-quest-id="' + q.id + '">' +
+            '<div class="tqi-icon">📜</div>' +
+            '<div class="tqi-body">' +
+              '<div class="tqi-title">' + q.title + ' ' + hasMemo + '</div>' +
+              '<div class="tqi-meta">' + dateStr + (durStr ? '　' + durStr : '') + '</div>' +
+            '</div>' +
+            '<div class="tqi-arrow">▶</div>' +
+          '</div>';
+        }).join('');
+        if (questsSorted.length > 5) {
+          questHtml += '<div class="territory-detail-more" id="td-quest-more">さらに' + (questsSorted.length - 5) + '件を表示</div>';
+        }
+        elements.territoryQuestList.innerHTML = questHtml;
+      }
+
+      // 書簡クリックイベント
+      elements.territoryQuestList.querySelectorAll('.territory-quest-item[data-quest-id]').forEach(item => {
+        item.addEventListener('click', () => {
+          elements.territoryModal.classList.remove('active');
+          showQuestDetailInDialogue(item.dataset.questId);
+        });
+      });
+      // もっと表示
+      const moreBtn = document.getElementById('td-quest-more');
+      if (moreBtn) {
+        moreBtn.addEventListener('click', () => {
+          const allHtml = questsSorted.map(q => {
+            const dateStr = new Date(q.completedAt).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' });
+            const durStr = q.duration ? q.duration + '分' : '';
+            const hasMemo = q.memo ? '📝' : '';
+            return '<div class="territory-quest-item" data-quest-id="' + q.id + '">' +
+              '<div class="tqi-icon">📜</div>' +
+              '<div class="tqi-body">' +
+                '<div class="tqi-title">' + q.title + ' ' + hasMemo + '</div>' +
+                '<div class="tqi-meta">' + dateStr + (durStr ? '　' + durStr : '') + '</div>' +
+              '</div>' +
+              '<div class="tqi-arrow">▶</div>' +
+            '</div>';
+          }).join('');
+          elements.territoryQuestList.innerHTML = allHtml;
+          elements.territoryQuestList.querySelectorAll('.territory-quest-item[data-quest-id]').forEach(item => {
+            item.addEventListener('click', () => {
+              elements.territoryModal.classList.remove('active');
+              showQuestDetailInDialogue(item.dataset.questId);
+            });
+          });
+        });
+      }
+
+      // テスト履歴表示（メモ付き）
+      const history = relatedTests.slice().sort((a, b) => new Date(b.date) - new Date(a.date));
+      if (history.length === 0) {
+        elements.territoryHistoryList.innerHTML = '<div class="territory-history-empty">まだ篝火に焚べた記録がありません</div>';
+      } else {
+        elements.territoryHistoryList.innerHTML = history.map(h => {
+          const scoreClass = h.score >= 80 ? 'high' : h.score >= 70 ? 'medium' : 'low';
+          const dateStr = new Date(h.date).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' });
+          const noteHtml = h.note ? '<span class="tti-note">' + h.note.replace(/</g, '&lt;') + '</span>' : '';
+          return '<div class="territory-test-item">' +
+            '<span class="tti-date">' + dateStr + '</span>' +
+            '<span class="tti-score ' + scoreClass + '">' + h.score + '%</span>' +
+            noteHtml +
+          '</div>';
+        }).join('');
+      }
+
+      // メモ表示
+      elements.territoryMemo.value = AppState.territoryMemos[territoryId] || '';
+
+      // クイックアクションボタン
+      elements.territoryDetailActions.innerHTML =
+        '<button class="btn-action" id="td-action-quest">📜 書簡を綴る</button>' +
+        '<button class="btn-action" id="td-action-test">🔥 篝火に焚べる</button>';
+      document.getElementById('td-action-quest').addEventListener('click', () => {
+        elements.territoryModal.classList.remove('active');
+        startWriteQuestFlow();
+      });
+      document.getElementById('td-action-test').addEventListener('click', () => {
+        elements.territoryModal.classList.remove('active');
+        document.getElementById('test-territory').value = territoryId;
+        elements.testModal.classList.add('active');
+        setAltarBackground();
+      });
+
+      elements.territoryModal.classList.add('active');
+    }
+
+    function saveTerritoryMemo() {
+      if (!AppState.currentTerritoryId) return;
+      AppState.territoryMemos[AppState.currentTerritoryId] = elements.territoryMemo.value;
+      saveState();
+      elements.territoryModal.classList.remove('active');
+    }
+
+    function updateTerritorySelects() {
+      const options = AppState.territories.map(t => '<option value="' + t.id + '">' + t.name + '</option>').join('');
+      document.getElementById('quest-territory').innerHTML = '<option value="">選択してください</option>' + options;
+      document.getElementById('test-territory').innerHTML = '<option value="">選択してください</option>' + options;
+      document.getElementById('study-territory').innerHTML = '<option value="">選択してください</option>' + options;
+    }
+
+    function checkReviewAlerts() {
+      const needsReview = getTerritoriesNeedingReview();
+      elements.reviewNotification.style.display = needsReview.length > 0 ? 'block' : 'none';
+      if (needsReview.length === 0) { elements.reviewList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✨</div><p>すべての領土が安定しています</p></div>'; }
+      else { elements.reviewList.innerHTML = needsReview.map(t => '<div class="alert-card"><div class="alert-icon">⚠️</div><div class="alert-content"><div class="alert-title">' + t.name + '</div><div class="alert-message">' + t.daysSinceReview + '日前 - 浄化度: ' + t.prosperity + '%</div></div><button class="alert-action" onclick="openTestModalFor(\'' + t.id + '\')">復習</button></div>').join(''); }
+    }
+
+    window.openTestModalFor = function(id) { document.getElementById('test-territory').value = id; elements.testModal.classList.add('active'); setAltarBackground(); };
+
+    function saveQuest() {
+      const title = document.getElementById('quest-title').value.trim();
+      const territoryId = document.getElementById('quest-territory').value;
+      const duration = parseInt(document.getElementById('quest-duration').value) || 30;
+      const memo = document.getElementById('quest-memo').value.trim();
+      if (!title) { alert('書簡の内容を入力してください'); return; }
+      AppState.quests.push({ id: Date.now().toString(), title, territoryId, duration, memo, completedAt: new Date().toISOString() });
+      saveState();
+      document.getElementById('quest-title').value = ''; document.getElementById('quest-territory').value = ''; document.getElementById('quest-duration').value = ''; document.getElementById('quest-memo').value = '';
+      elements.questModal.classList.remove('active'); updateUI();
+      const milestone = recordStudyDay();
+      if (milestone) {
+        showMilestonePopup(milestone);
+      } else {
+        const questDialogue = expandTemplate(CLAIRE_EVENTS.questSaved, { title: title, duration: duration });
+        showDialogue(questDialogue.text, questDialogue.expression, questDialogue.actions || [{ label: '書簡を綴る', value: '書簡を綴りたい' }, { label: '篝火に焚べる', value: 'テストの結果を報告したい' }]);
+      }
+      setTimeout(checkAchievements, 500);
+    }
+
+    function saveTestResult() {
+      const territoryId = document.getElementById('test-territory').value;
+      const score = parseInt(document.getElementById('test-score').value);
+      const note = document.getElementById('test-note').value.trim();
+      if (!territoryId || isNaN(score) || score < 0 || score > 100) { alert('領土と浄化度を正しく入力してください'); return; }
+      const territory = AppState.territories.find(t => t.id === territoryId);
+      if (!territory) return;
+      territory.lastReview = new Date().toISOString();
+      territory.prosperity = score;
+      if (score >= 70) territory.conquered = true;
+      AppState.testHistory.push({ id: Date.now().toString(), territoryId, score, note, date: new Date().toISOString() });
+      saveState();
+      document.getElementById('test-territory').value = ''; document.getElementById('test-score').value = ''; document.getElementById('test-note').value = '';
+      elements.testModal.classList.remove('active'); updateUI();
+
+      // 結果セリフを準備
+      let response;
+      if (score >= 90) { response = expandTemplate(CLAIRE_EVENTS.testExcellent, { territoryName: territory.name, score: score }); }
+      else if (score >= 70) { response = expandTemplate(CLAIRE_EVENTS.testPassed, { territoryName: territory.name, score: score }); }
+      else { response = expandTemplate(CLAIRE_EVENTS.testFailed, { territoryName: territory.name, score: score }); }
+      const actions = score >= 70 ? [{ label: '次の領土の書簡を綴る', value: '書簡を綴りたい' }, { label: '続けて焚べる', value: 'テストの結果を報告したい' }, { label: '執務室に戻る', value: 'メインに戻る' }] : [{ label: '再び書簡を綴る', value: '書簡を綴りたい' }, { label: '再び焚べる', value: territory.name + 'のテスト結果を報告したい' }, { label: '執務室に戻る', value: 'メインに戻る' }];
+      const milestone = recordStudyDay();
+
+      // 篝火演出→結果表示
+      playBonfireOffering(() => {
+        restoreBackground();
+        if (milestone) {
+          showDialogue(response.text, response.expression, actions);
+          setTimeout(() => showMilestonePopup(milestone), 800);
+        } else {
+          showDialogue(response.text, response.expression, actions);
+        }
+        setTimeout(checkAchievements, 500);
+      });
+    }
+
+    function playBonfireOffering(callback) {
+      const overlay = document.getElementById('bonfire-overlay');
+      const video = document.getElementById('bonfire-video');
+      const skipBtn = document.getElementById('bonfire-skip');
+
+      // クレアスプライトとセリフを隠す
+      elements.claireSprite.style.opacity = '0';
+      elements.dialogueText.innerHTML = '';
+      elements.quickActions.innerHTML = '';
+
+      overlay.classList.add('active');
+      video.currentTime = 0;
+      video.play().catch(() => {
+        // 自動再生できない場合はスキップ
+        finishBonfireOffering(callback);
+      });
+
+      function finishBonfireOffering(cb) {
+        video.pause();
+        // フェードアウト
+        overlay.style.transition = 'opacity 0.8s ease';
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+          overlay.classList.remove('active');
+          overlay.style.transition = '';
+          overlay.style.opacity = '';
+          elements.claireSprite.style.opacity = '';
+          cb();
+        }, 800);
+      }
+
+      // 動画終了時
+      const onEnded = () => {
+        video.removeEventListener('ended', onEnded);
+        skipBtn.removeEventListener('click', onSkip);
+        finishBonfireOffering(callback);
+      };
+      // スキップ
+      const onSkip = () => {
+        video.removeEventListener('ended', onEnded);
+        skipBtn.removeEventListener('click', onSkip);
+        finishBonfireOffering(callback);
+      };
+
+      video.addEventListener('ended', onEnded);
+      skipBtn.addEventListener('click', onSkip);
+    }
+    function saveState() {
+      AppState.lastModified = new Date().toISOString();
+      localStorage.setItem('rekingdom-state', JSON.stringify(AppState));
+      if (SyncManager.isConnected && SyncManager.autoSync) { SyncManager.upload(true); }
+    }
+    function loadState() { const saved = localStorage.getItem('rekingdom-state'); if (saved) { Object.assign(AppState, JSON.parse(saved)); } if (!AppState.streak) { AppState.streak = { current: 0, longest: 0, lastStudyDate: null, titles: [] }; } if (!AppState.achievements) { AppState.achievements = {}; } if (!AppState.items) { AppState.items = {}; } if (!AppState.conditionLogs) { AppState.conditionLogs = []; } if (!AppState.territoryMemos) { AppState.territoryMemos = {}; } }
+
+    // === クラウド同期（Firebase Firestore） ===
+
+    const SYNC_CONFIG_KEY = 'rekingdom-sync-config';
+
+    const SyncManager = {
+      db: null,
+      isConnected: false,
+      autoSync: false,
+      syncId: '',
+      lastSyncAt: null,
+      _uploadTimer: null,
+
+      loadConfig() {
+        const raw = localStorage.getItem(SYNC_CONFIG_KEY);
+        if (!raw) return null;
+        try { return JSON.parse(raw); } catch(e) { return null; }
+      },
+
+      saveConfig(firebaseConfigStr, syncId, autoSync) {
+        const config = { firebaseConfig: firebaseConfigStr, syncId: syncId, autoSync: autoSync, lastSyncAt: this.lastSyncAt };
+        localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(config));
+      },
+
+      initFirebase(configStr) {
+        if (typeof firebase === 'undefined') { throw new Error('Firebase SDKが読み込まれていません。\nインターネット接続を確認してください。'); }
+        let config;
+        try {
+          // まず標準JSONとしてパース試行
+          config = JSON.parse(configStr);
+        } catch(e) {
+          try {
+            // JS形式（キーにクォートなし）を正規JSONに変換してリトライ
+            const fixed = configStr.replace(/;\s*$/, '').replace(/([{,]\s*)(\w+)\s*:/g, '$1"$2":');
+            config = JSON.parse(fixed);
+          } catch(e2) {
+            throw new Error('Firebase設定の形式が正しくありません。\nConfigの { } 部分をそのまま貼り付けてください。');
+          }
+        }
+        if (!config.apiKey || !config.projectId) { throw new Error('apiKeyとprojectIdは必須です。'); }
+        // 既存appがあれば使い回す
+        if (firebase.apps.length === 0) { firebase.initializeApp(config); }
+        this.db = firebase.firestore();
+        this.isConnected = true;
+        this.updateStatusDot('connected');
+      },
+
+      async testConnection() {
+        if (!this.db || !this.syncId) throw new Error('設定が不完全です。');
+        // Firestoreに読み取りテスト
+        await this.db.collection('rekingdom').doc(this.syncId).get();
+        return true;
+      },
+
+      async upload(silent) {
+        if (!this.db || !this.syncId) return;
+        try {
+          this.updateStatusDot('syncing');
+          const data = { state: JSON.stringify(AppState), updatedAt: firebase.firestore.FieldValue.serverTimestamp(), lastModified: AppState.lastModified || new Date().toISOString() };
+          await this.db.collection('rekingdom').doc(this.syncId).set(data);
+          this.lastSyncAt = new Date().toISOString();
+          this.updateLastSyncUI();
+          this.updateStatusDot('connected');
+          // 設定にlastSyncAtを保存
+          const cfg = this.loadConfig();
+          if (cfg) { cfg.lastSyncAt = this.lastSyncAt; localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(cfg)); }
+          if (!silent) { this.showSyncToast('アップロード完了'); }
+        } catch(e) {
+          this.updateStatusDot('error');
+          if (!silent) { alert('アップロード失敗: ' + e.message); }
+        }
+      },
+
+      async download() {
+        if (!this.db || !this.syncId) return;
+        try {
+          this.updateStatusDot('syncing');
+          const doc = await this.db.collection('rekingdom').doc(this.syncId).get();
+          if (!doc.exists) { alert('クラウドにデータが見つかりません。\n先にアップロードしてください。'); this.updateStatusDot('connected'); return; }
+          const cloudState = JSON.parse(doc.data().state);
+          // AppStateをクラウドデータで上書き
+          Object.keys(AppState).forEach(k => delete AppState[k]);
+          Object.assign(AppState, cloudState);
+          saveStateLocal(); // ローカルのみ保存（再帰防止）
+          updateUI();
+          renderAchievements();
+          renderItems();
+          this.lastSyncAt = new Date().toISOString();
+          this.updateLastSyncUI();
+          this.updateStatusDot('connected');
+          const cfg = this.loadConfig();
+          if (cfg) { cfg.lastSyncAt = this.lastSyncAt; localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(cfg)); }
+          this.showSyncToast('ダウンロード完了');
+        } catch(e) {
+          this.updateStatusDot('error');
+          alert('ダウンロード失敗: ' + e.message);
+        }
+      },
+
+      async checkCloudOnLoad() {
+        if (!this.db || !this.syncId) return;
+        try {
+          const doc = await this.db.collection('rekingdom').doc(this.syncId).get();
+          if (!doc.exists) return;
+          const cloudLastMod = doc.data().lastModified;
+          const localLastMod = AppState.lastModified;
+          if (cloudLastMod && localLastMod && cloudLastMod > localLastMod) {
+            this.showCloudNewerNotice();
+          }
+        } catch(e) { /* silent fail */ }
+      },
+
+      showCloudNewerNotice() {
+        const toast = document.createElement('div');
+        toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--bg-medium);border:1px solid var(--accent-gold);border-radius:10px;padding:0.75rem 1rem;z-index:10000;display:flex;flex-direction:column;gap:0.5rem;align-items:center;font-size:0.8rem;color:var(--text-primary);box-shadow:0 4px 20px rgba(0,0,0,0.5);max-width:280px;';
+        toast.innerHTML = '<div>☁️ クラウドに新しいデータがあります</div><div style="display:flex;gap:0.5rem;"><button id="cloud-sync-yes" style="padding:0.35rem 1rem;border-radius:6px;border:1px solid var(--accent-gold);background:rgba(201,162,39,0.15);color:var(--accent-gold);cursor:pointer;font-size:0.8rem;">同期する</button><button id="cloud-sync-no" style="padding:0.35rem 1rem;border-radius:6px;border:1px solid var(--border-color);background:none;color:var(--text-secondary);cursor:pointer;font-size:0.8rem;">後で</button></div>';
+        document.body.appendChild(toast);
+        document.getElementById('cloud-sync-yes').addEventListener('click', () => { toast.remove(); this.download(); });
+        document.getElementById('cloud-sync-no').addEventListener('click', () => { toast.remove(); });
+        setTimeout(() => { if (toast.parentNode) toast.remove(); }, 15000);
+      },
+
+      showSyncToast(message) {
+        const toast = document.createElement('div');
+        toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--bg-medium);border:1px solid var(--accent-gold);border-radius:8px;padding:0.5rem 1.2rem;z-index:10000;font-size:0.8rem;color:var(--accent-gold);box-shadow:0 4px 15px rgba(0,0,0,0.4);transition:opacity 0.5s;';
+        toast.textContent = '☁️ ' + message;
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 2000);
+      },
+
+      updateStatusDot(state) {
+        const dot = document.getElementById('sync-status-dot');
+        if (!dot) return;
+        dot.className = 'sync-status-dot ' + state;
+      },
+
+      updateLastSyncUI() {
+        const el = document.getElementById('sync-last-sync');
+        if (el && this.lastSyncAt) { el.textContent = '最終同期: ' + new Date(this.lastSyncAt).toLocaleString('ja-JP'); }
+      },
+
+      updateConnectionStatusUI() {
+        const el = document.getElementById('sync-connection-status');
+        if (el) { el.textContent = this.isConnected ? '✅ 接続済み' : '❌ 未接続'; }
+      },
+
+      // 起動時に保存済み設定で自動接続
+      autoConnect() {
+        const cfg = this.loadConfig();
+        if (!cfg || !cfg.firebaseConfig || !cfg.syncId) return;
+        try {
+          this.initFirebase(cfg.firebaseConfig);
+          this.syncId = cfg.syncId;
+          this.autoSync = cfg.autoSync || false;
+          this.lastSyncAt = cfg.lastSyncAt || null;
+          this.checkCloudOnLoad();
+        } catch(e) { /* silent fail */ }
+      }
+    };
+
+    // saveStateのローカル専用版（ダウンロード時の再帰防止用）
+    function saveStateLocal() { AppState.lastModified = new Date().toISOString(); localStorage.setItem('rekingdom-state', JSON.stringify(AppState)); }
+
+    // === タイマー機能 ===
+
+    // === 書簡を綴るフロー ===
+
+    function startWriteQuestFlow() {
+      showDialogue('書簡を綴るのですね！\nお待ちしておりました。', 'smile', [
+        { label: 'はい', value: '__WRITE_QUEST_STEP2__' }
+      ]);
+    }
+
+    // 内部コマンドをhandleSendMessage前に処理
+    function handleInternalCommand(content) {
+      if (content === '__WRITE_QUEST_STEP2__') {
+        showDialogue('では、目的とする地域はどこにいたしましょうか。', 'normal', [
+          { label: '地域を選ぶ', value: '__WRITE_QUEST_STEP3__' }
+        ]);
+        return true;
+      }
+      if (content === '__WRITE_QUEST_STEP3__') {
+        openStudyModal();
+        return true;
+      }
+      if (content === '__LIBRARY_CONFIRM_YES__') {
+        showDialogue('では、共に参りましょう！', 'smile', [
+          { label: '▶', value: '__LIBRARY_TRANSITION__' }
+        ]);
+        return true;
+      }
+      if (content === '__LIBRARY_TRANSITION__') {
+        playLibraryTransition(() => {
+          if (!AppState.visitedLibrary) {
+            AppState.visitedLibrary = true;
+            saveState();
+            showDialogue('……久しぶりに、この図書室に人の気配が戻りました。\n机の上の埃が少し申し訳なさそうですね。', 'thinking', [
+              { label: '書簡を綴る', value: '__LIBRARY_OPEN_MODE__' }
+            ]);
+          } else {
+            showDialogue('図書室に到着いたしました。\n灯筆の準備は万全です。……さあ、綴りましょう。', 'smile', [
+              { label: '書簡を綴る', value: '__LIBRARY_OPEN_MODE__' }
+            ]);
+          }
+        });
+        return true;
+      }
+      if (content === '__LIBRARY_OPEN_MODE__') {
+        openModeSelectModal();
+        return true;
+      }
+      if (content === '__LIBRARY_CONFIRM_NO__') {
+        restoreBackground();
+        showDialogue('かしこまりました。\n準備ができたら、またお声掛けください。', 'smile', [
+          { label: '書簡を綴る', value: '書簡を綴りたい' },
+          { label: '篝火に焚べる', value: '篝火に焚べたい' },
+          { label: 'メインに戻る', value: 'メインに戻る' }
+        ]);
+        return true;
+      }
+      if (content === '__QUEST_LIST_BACK__') {
+        showQuestListInDialogue(window._questListPage || 0);
+        return true;
+      }
+      return false;
+    }
+
+    function showLibraryConfirmation(territoryId) {
+      window._pendingStudyTerritoryId = territoryId;
+      showDialogue('では、図書室へ移動いたします。\n準備はよろしいでしょうか？', 'normal', [
+        { label: 'わかった', value: '__LIBRARY_CONFIRM_YES__' },
+        { label: '少し待ってほしい', value: '__LIBRARY_CONFIRM_NO__' }
+      ]);
+    }
+
+    function openModeSelectModal() {
+      elements.studyStepTerritory.classList.remove('active');
+      elements.studyStepMode.classList.add('active');
+      elements.studyModalTitle.textContent = '書簡の綴り方を選択';
+      elements.studyNext.style.display = 'none';
+      elements.studyModal.classList.add('active');
+      const territory = AppState.territories.find(t => t.id === window._pendingStudyTerritoryId);
+      if (territory) {
+        const d = expandTemplate(CLAIRE_EVENTS.studySelectMode, { territoryName: territory.name });
+        showDialogue(d.text, d.expression, []);
+      }
+    }
+
+    function openStudyModal() {
+      elements.studyStepTerritory.classList.add('active');
+      elements.studyStepMode.classList.remove('active');
+      elements.studyModalTitle.textContent = '書簡の対象を選択';
+      elements.studyTerritory.value = '';
+      elements.studyNext.style.display = 'none';
+      elements.studyModal.classList.add('active');
+      const d = expandTemplate(CLAIRE_EVENTS.studySelectTerritory);
+      showDialogue(d.text, d.expression, []);
+    }
+
+    function closeStudyModal() {
+      elements.studyModal.classList.remove('active');
+      const d = getDefaultDialogue();
+      showDialogue(d.text, d.expression, d.actions);
+    }
+
+    function startStudyTimer(territoryId, mode) {
+      const territory = AppState.territories.find(t => t.id === territoryId);
+      if (!territory) return;
+
+      TimerState.active = true;
+      TimerState.paused = false;
+      TimerState.mode = mode;
+      TimerState.phase = mode === 'pomodoro' ? 'work' : null;
+      TimerState.territoryId = territoryId;
+      TimerState.territoryName = territory.name;
+      TimerState.elapsed = 0;
+      TimerState.totalStudyMinutes = 0;
+      TimerState.remaining = mode === 'pomodoro' ? 25 * 60 : 0;
+
+      elements.timerTerritory.textContent = '⚔️ ' + territory.name;
+      updateTimerDisplay();
+      elements.timerOverlay.classList.add('active');
+      elements.timerPause.textContent = '一時停止';
+
+      const dialogue = expandTemplate(CLAIRE_EVENTS.timerStart, { territoryName: territory.name });
+      showDialogue(dialogue.text, dialogue.expression, []);
+
+      TimerState.intervalId = setInterval(tickTimer, 1000);
+    }
+
+    function tickTimer() {
+      if (TimerState.paused) return;
+
+      if (TimerState.mode === 'pomodoro') {
+        TimerState.remaining--;
+        if (TimerState.phase === 'work') {
+          TimerState.elapsed++;
+        }
+        if (TimerState.remaining <= 0) {
+          if (TimerState.phase === 'work') {
+            completePomodorWork();
+          } else {
+            completePomodoroBreak();
+          }
+          return;
+        }
+      } else {
+        TimerState.elapsed++;
+      }
+      updateTimerDisplay();
+    }
+
+    function updateTimerDisplay() {
+      if (TimerState.mode === 'pomodoro') {
+        elements.timerTime.textContent = formatTime(TimerState.remaining);
+        if (TimerState.phase === 'work') {
+          elements.timerPhase.textContent = '🔥 集中タイム';
+          elements.timerPhase.className = 'timer-phase work';
+          elements.timerTime.className = 'timer-time';
+        } else {
+          elements.timerPhase.textContent = '☕ 休憩タイム';
+          elements.timerPhase.className = 'timer-phase break';
+          elements.timerTime.className = 'timer-time break';
+        }
+      } else {
+        elements.timerTime.textContent = formatTime(TimerState.elapsed);
+        elements.timerPhase.textContent = '✒️ 灯筆執筆中';
+        elements.timerPhase.className = 'timer-phase work';
+        elements.timerTime.className = 'timer-time';
+      }
+    }
+
+    function toggleTimerPause() {
+      TimerState.paused = !TimerState.paused;
+      elements.timerPause.textContent = TimerState.paused ? '再開' : '一時停止';
+      if (TimerState.paused) {
+        const lines = CLAIRE_TIMER_PAUSED;
+        const line = lines[Math.floor(Math.random() * lines.length)];
+        showDialogue(line.text, line.expression, []);
+      } else {
+        const lines = CLAIRE_TIMER_RESUMED;
+        const line = lines[Math.floor(Math.random() * lines.length)];
+        showDialogue(line.text, line.expression, []);
+      }
+    }
+
+    function stopTimer() {
+      clearInterval(TimerState.intervalId);
+      TimerState.active = false;
+      elements.timerOverlay.classList.remove('active');
+      restoreBackground();
+
+      // 作業中の場合のみ経過時間を加算（休憩中は加算しない）
+      if (TimerState.mode === 'free' || (TimerState.mode === 'pomodoro' && TimerState.phase === 'work')) {
+        const studyMinutes = Math.max(1, Math.round(TimerState.elapsed / 60));
+        TimerState.totalStudyMinutes += studyMinutes;
+      }
+
+      if (TimerState.totalStudyMinutes >= 1) {
+        autoRegisterQuest(TimerState.territoryId, TimerState.territoryName, TimerState.totalStudyMinutes);
+      }
+
+      const dialogue = expandTemplate(CLAIRE_EVENTS.freeStudyDone, { territoryName: TimerState.territoryName, duration: TimerState.totalStudyMinutes || 1 });
+      showDialogue(dialogue.text, dialogue.expression, [
+        { label: '続けて書簡を綴る', value: '書簡を綴りたい' },
+        { label: '篝火に焚べる', value: 'テストの結果を報告したい' }
+      ]);
+    }
+
+    function completePomodorWork() {
+      clearInterval(TimerState.intervalId);
+      playNotificationSound();
+
+      const studyMinutes = Math.round(TimerState.elapsed / 60);
+      TimerState.totalStudyMinutes += studyMinutes;
+
+      TimerState.phase = 'break';
+      TimerState.remaining = 5 * 60;
+      TimerState.elapsed = 0;
+      updateTimerDisplay();
+
+      const dialogue = expandTemplate(CLAIRE_EVENTS.pomodoroWorkDone);
+      showDialogue(dialogue.text, dialogue.expression, []);
+
+      TimerState.intervalId = setInterval(tickTimer, 1000);
+    }
+
+    function completePomodoroBreak() {
+      clearInterval(TimerState.intervalId);
+      TimerState.active = false;
+      elements.timerOverlay.classList.remove('active');
+      restoreBackground();
+      playNotificationSound();
+
+      autoRegisterQuest(TimerState.territoryId, TimerState.territoryName, TimerState.totalStudyMinutes);
+
+      const dialogue = expandTemplate(CLAIRE_EVENTS.pomodoroBreakDone, { territoryName: TimerState.territoryName, duration: TimerState.totalStudyMinutes });
+      showDialogue(dialogue.text, dialogue.expression, [
+        { label: '同じ分野で続ける', value: 'TIMER_SAME' },
+        { label: '別の領土で書簡を綴る', value: '書簡を綴りたい' },
+        { label: '灯筆を置く', value: 'ご苦労だった' }
+      ]);
+    }
+
+    function autoRegisterQuest(territoryId, territoryName, minutes) {
+      AppState.quests.push({
+        id: Date.now().toString(),
+        title: territoryName + ' の書簡',
+        territoryId: territoryId,
+        duration: minutes,
+        memo: '',
+        completedAt: new Date().toISOString()
+      });
+      saveState();
+      updateUI();
+      const milestone = recordStudyDay();
+      if (milestone) {
+        setTimeout(() => showMilestonePopup(milestone), 500);
+      }
+      setTimeout(checkAchievements, 600);
+    }
+
+    function playNotificationSound() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const playTone = (freq, start, dur) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.3, ctx.currentTime + start);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + start + dur);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + start);
+          osc.stop(ctx.currentTime + start + dur);
+        };
+        playTone(523, 0, 0.2);
+        playTone(659, 0.2, 0.2);
+        playTone(784, 0.4, 0.4);
+      } catch (e) { /* Audio not supported */ }
+    }
+
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    }
+
+    // 「同じ分野で続ける」ハンドラー
+    function handleTimerSame() {
+      TimerState.totalStudyMinutes = 0;
+      setLibraryBackground();
+      startStudyTimer(TimerState.territoryId, 'pomodoro');
+    }
+
+    // === 体調記録システム ===
+
+    const SYMPTOM_TAGS = {
+      headache: '🤕 頭痛', sleepy: '😪 眠気', stiff: '💪 肩こり', eyestrain: '👁️ 目の疲れ',
+      fatigue: '🥱 だるさ', stomach: '🤢 胃腸の不調', stress: '😰 ストレス', unfocused: '🌀 集中力低下'
+    };
+    const CONDITION_LEVELS = ['', '😵 最悪', '😔 悪い', '😐 普通', '😊 良い', '😄 絶好調'];
+
+    function getTodayDateStr() {
+      const now = new Date();
+      const jst = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+      return jst.getFullYear() + '-' + String(jst.getMonth() + 1).padStart(2, '0') + '-' + String(jst.getDate()).padStart(2, '0');
+    }
+
+    function getTodayCondition() {
+      const today = getTodayDateStr();
+      return AppState.conditionLogs.find(c => c.date === today);
+    }
+
+    function openConditionModal() {
+      const existing = getTodayCondition();
+      // フォームリセット
+      document.querySelectorAll('.cond-level-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.cond-tag').forEach(b => b.classList.remove('active'));
+      document.getElementById('cond-sleep').value = '';
+      document.getElementById('cond-caffeine').value = '';
+      document.getElementById('cond-meal-b').checked = false;
+      document.getElementById('cond-meal-l').checked = false;
+      document.getElementById('cond-meal-d').checked = false;
+      document.getElementById('cond-temp').value = '';
+      document.getElementById('cond-pressure').value = '';
+      document.getElementById('cond-note').value = '';
+      // 既存データがあれば復元
+      if (existing) {
+        const lvlBtn = document.querySelector('.cond-level-btn[data-level="' + existing.condition + '"]');
+        if (lvlBtn) lvlBtn.classList.add('active');
+        (existing.symptoms || []).forEach(s => {
+          const tag = document.querySelector('.cond-tag[data-tag="' + s + '"]');
+          if (tag) tag.classList.add('active');
+        });
+        if (existing.sleepHours != null) document.getElementById('cond-sleep').value = existing.sleepHours;
+        if (existing.caffeine != null) document.getElementById('cond-caffeine').value = existing.caffeine;
+        if (existing.meals) {
+          document.getElementById('cond-meal-b').checked = !!existing.meals.breakfast;
+          document.getElementById('cond-meal-l').checked = !!existing.meals.lunch;
+          document.getElementById('cond-meal-d').checked = !!existing.meals.dinner;
+        }
+        if (existing.temperature != null) document.getElementById('cond-temp').value = existing.temperature;
+        if (existing.pressure != null) document.getElementById('cond-pressure').value = existing.pressure;
+        if (existing.note) document.getElementById('cond-note').value = existing.note;
+      }
+      document.getElementById('condition-modal').classList.add('active');
+      showDialogue('ご体調の報告ですね。\n正直にお聞かせください。', 'thinking', []);
+    }
+
+    function saveCondition() {
+      const activeLevel = document.querySelector('.cond-level-btn.active');
+      if (!activeLevel) { alert('体調レベルを選択してください'); return; }
+      const condition = parseInt(activeLevel.dataset.level);
+      const symptoms = Array.from(document.querySelectorAll('.cond-tag.active')).map(b => b.dataset.tag);
+      const sleepVal = document.getElementById('cond-sleep').value;
+      const caffeineVal = document.getElementById('cond-caffeine').value;
+      const tempVal = document.getElementById('cond-temp').value;
+      const pressureVal = document.getElementById('cond-pressure').value;
+      const note = document.getElementById('cond-note').value.trim();
+      const meals = {
+        breakfast: document.getElementById('cond-meal-b').checked,
+        lunch: document.getElementById('cond-meal-l').checked,
+        dinner: document.getElementById('cond-meal-d').checked
+      };
+
+      const today = getTodayDateStr();
+      const entry = {
+        id: Date.now().toString(),
+        date: today,
+        condition: condition,
+        symptoms: symptoms,
+        sleepHours: sleepVal !== '' ? parseFloat(sleepVal) : null,
+        caffeine: caffeineVal !== '' ? parseInt(caffeineVal) : null,
+        meals: meals,
+        temperature: tempVal !== '' ? parseFloat(tempVal) : null,
+        pressure: pressureVal !== '' ? parseFloat(pressureVal) : null,
+        note: note,
+        createdAt: new Date().toISOString()
+      };
+
+      // 今日のデータがあれば上書き
+      const existingIdx = AppState.conditionLogs.findIndex(c => c.date === today);
+      if (existingIdx >= 0) {
+        AppState.conditionLogs[existingIdx] = entry;
+      } else {
+        AppState.conditionLogs.push(entry);
+      }
+      saveState();
+
+      document.getElementById('condition-modal').classList.remove('active');
+      const comment = getConditionComment(entry);
+      showDialogue(comment.text, comment.expression, [
+        { label: '体調の分析を見る', value: '体調を分析したい' },
+        { label: 'メインに戻る', value: 'メインに戻る' }
+      ]);
+    }
+
+    function getConditionComment(entry) {
+      const lv = entry.condition;
+      const syms = entry.symptoms || [];
+      if (lv <= 1) {
+        return { text: '……お辛そうですね。\n無理は禁物でございます。今日は灯筆を置いて、お体を休めてください。\n篝火はこのクレアが守りますから。', expression: 'worried' };
+      }
+      if (lv === 2) {
+        if (syms.includes('headache')) return { text: '頭痛がおありなのですね……。\n温かいお飲み物でもいかがでしょう。\n短い書簡だけでも、きっと力になります。', expression: 'worried' };
+        return { text: '少しお疲れのようですね。\nくれぐれもご無理なさらず、できる範囲でお願いいたします。', expression: 'thinking' };
+      }
+      if (lv === 3) {
+        return { text: '承知いたしました。\n体調の記録、ありがとうございます。\n今日もできる範囲で、共に参りましょう。', expression: 'normal' };
+      }
+      if (lv === 4) {
+        return { text: '良い体調とのこと、何よりでございます！\nこの調子で書簡を綴れば、きっと捗りましょう。', expression: 'smile' };
+      }
+      return { text: '絶好調とのこと！素晴らしい！\n今日は灯筆が冴え渡ること間違いなしです。\n存分に霧を晴らしてまいりましょう！', expression: 'proud' };
+    }
+
+    function showConditionLogInDialogue(page) {
+      page = page || 0;
+      window._conditionLogPage = page;
+      setExpression('normal');
+      elements.quickActions.innerHTML = '';
+
+      const logs = AppState.conditionLogs.slice().sort((a, b) => b.date.localeCompare(a.date));
+      const pageSize = 5;
+      const totalPages = Math.max(1, Math.ceil(logs.length / pageSize));
+      if (page >= totalPages) page = totalPages - 1;
+      if (page < 0) page = 0;
+
+      let html;
+      if (logs.length === 0) {
+        html = '<p>体調の記録はまだございません。</p><div class="dialogue-quest-empty">📋 「体調を報告」で記録を始めましょう</div>';
+      } else {
+        html = '<p>体調の記録でございます。（全' + logs.length + '件）</p>';
+        const pageLogs = logs.slice(page * pageSize, (page + 1) * pageSize);
+        html += '<div class="dialogue-quest-list">' + pageLogs.map(c => {
+          const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+          const d = new Date(c.date + 'T00:00:00+09:00');
+          const dayStr = c.date.slice(5) + '（' + dayNames[d.getDay()] + '）';
+          const symStr = (c.symptoms || []).slice(0, 3).map(s => SYMPTOM_TAGS[s] || s).join(' ');
+          return '<div class="dialogue-quest-card">' +
+            '<div class="dqc-icon" style="font-size:1.3rem;">' + CONDITION_LEVELS[c.condition].split(' ')[0] + '</div>' +
+            '<div class="dqc-body">' +
+              '<div class="dqc-title">' + CONDITION_LEVELS[c.condition].split(' ')[1] + (c.sleepHours != null ? '　💤' + c.sleepHours + 'h' : '') + '</div>' +
+              '<div class="dqc-meta">' + dayStr + (symStr ? '　' + symStr : '') + '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('') + '</div>';
+        if (totalPages > 1) {
+          html += '<div class="dialogue-quest-nav">' +
+            '<button id="cond-page-prev" ' + (page <= 0 ? 'disabled' : '') + '>◀ 前</button>' +
+            '<span>' + (page + 1) + ' / ' + totalPages + '</span>' +
+            '<button id="cond-page-next" ' + (page >= totalPages - 1 ? 'disabled' : '') + '>次 ▶</button>' +
+          '</div>';
+        }
+      }
+      elements.dialogueText.innerHTML = html;
+
+      const prevBtn = document.getElementById('cond-page-prev');
+      const nextBtn = document.getElementById('cond-page-next');
+      if (prevBtn) prevBtn.addEventListener('click', () => showConditionLogInDialogue(page - 1));
+      if (nextBtn) nextBtn.addEventListener('click', () => showConditionLogInDialogue(page + 1));
+
+      const actions = [
+        { label: '体調を報告', value: '体調を報告したい' },
+        { label: '体調の分析', value: '体調を分析したい' },
+        { label: 'メインに戻る', value: 'メインに戻る' }
+      ];
+      elements.quickActions.innerHTML = actions.map(a => '<button class="quick-action-btn" data-value="' + a.value + '">' + a.label + '</button>').join('');
+      elements.quickActions.querySelectorAll('.quick-action-btn').forEach(btn => {
+        btn.addEventListener('click', () => { if (btn.dataset.value) { elements.userInput.value = btn.dataset.value; handleSendMessage(); } });
+      });
+    }
+
+    function showConditionAnalysis() {
+      setExpression('thinking');
+      elements.quickActions.innerHTML = '';
+
+      const logs = AppState.conditionLogs;
+      if (logs.length < 3) {
+        showDialogue('分析には最低3日分の記録が必要でございます。\nもう少し体調の報告を続けてくださいませ。', 'thinking', [
+          { label: '体調を報告', value: '体調を報告したい' },
+          { label: 'メインに戻る', value: 'メインに戻る' }
+        ]);
+        return;
+      }
+
+      let html = '<div class="cond-analysis">';
+
+      // 1. 曜日別平均体調
+      const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+      const dayData = Array(7).fill(null).map(() => ({ total: 0, count: 0 }));
+      logs.forEach(c => {
+        const d = new Date(c.date + 'T00:00:00+09:00');
+        const day = d.getDay();
+        dayData[day].total += c.condition;
+        dayData[day].count++;
+      });
+      const dayOrder = [1, 2, 3, 4, 5, 6, 0]; // 月〜日
+      const maxAvg = 5;
+      html += '<div class="cond-chart-section"><div class="cond-chart-title">📊 曜日別の平均体調</div>';
+      html += '<div class="cond-bar-chart">' + dayOrder.map(i => {
+        const avg = dayData[i].count > 0 ? (dayData[i].total / dayData[i].count) : 0;
+        const barH = Math.max(Math.round((avg / maxAvg) * 60), 2);
+        const color = avg >= 4 ? '#6abf7b' : avg >= 3 ? 'var(--accent-gold)' : avg >= 2 ? '#e89040' : '#e86464';
+        return '<div class="cond-bar-col">' +
+          '<div class="cond-bar-value">' + (avg > 0 ? avg.toFixed(1) : '—') + '</div>' +
+          '<div class="cond-bar" style="height:' + barH + 'px;background:' + (avg > 0 ? color : 'var(--border-subtle)') + ';"></div>' +
+          '<div class="cond-bar-label">' + dayNames[i] + '</div>' +
+        '</div>';
+      }).join('') + '</div></div>';
+
+      // 2. 体調×学習時間の相関
+      html += '<div class="cond-chart-section"><div class="cond-chart-title">📈 体調レベル別の平均学習時間</div>';
+      const levelStudy = Array(6).fill(null).map(() => ({ totalMin: 0, count: 0 }));
+      logs.forEach(c => {
+        const dayQuests = AppState.quests.filter(q => {
+          const qDate = new Date(q.completedAt).toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' });
+          return qDate === c.date;
+        });
+        const dayMin = dayQuests.reduce((s, q) => s + (q.duration || 0), 0);
+        levelStudy[c.condition].totalMin += dayMin;
+        levelStudy[c.condition].count++;
+      });
+      html += '<div class="cond-bar-chart">' + [1, 2, 3, 4, 5].map(lv => {
+        const avg = levelStudy[lv].count > 0 ? Math.round(levelStudy[lv].totalMin / levelStudy[lv].count) : 0;
+        const maxMin = Math.max(...[1, 2, 3, 4, 5].map(l => levelStudy[l].count > 0 ? levelStudy[l].totalMin / levelStudy[l].count : 0), 1);
+        const barH = Math.max(Math.round((avg / maxMin) * 60), 2);
+        return '<div class="cond-bar-col">' +
+          '<div class="cond-bar-value">' + (avg > 0 ? avg + '分' : '—') + '</div>' +
+          '<div class="cond-bar" style="height:' + barH + 'px;background:var(--accent-gold);"></div>' +
+          '<div class="cond-bar-label">' + CONDITION_LEVELS[lv].split(' ')[0] + '</div>' +
+        '</div>';
+      }).join('') + '</div></div>';
+
+      // 3. 症状ランキング
+      const symCount = {};
+      logs.forEach(c => (c.symptoms || []).forEach(s => { symCount[s] = (symCount[s] || 0) + 1; }));
+      const symRank = Object.entries(symCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      if (symRank.length > 0) {
+        const maxCount = symRank[0][1];
+        html += '<div class="cond-chart-section"><div class="cond-chart-title">🏷️ よくある症状</div>';
+        html += symRank.map(([tag, count]) => {
+          const pct = (count / maxCount) * 100;
+          return '<div class="cond-tag-freq">' +
+            '<span class="cond-tag-freq-name">' + (SYMPTOM_TAGS[tag] || tag) + '</span>' +
+            '<div style="flex:1;background:var(--bg-medium);border-radius:3px;overflow:hidden;">' +
+              '<div class="cond-tag-freq-bar" style="width:' + pct + '%;"></div>' +
+            '</div>' +
+            '<span class="cond-tag-freq-count">' + count + '回</span>' +
+          '</div>';
+        }).join('') + '</div>';
+      }
+
+      // 4. サマリーカード
+      const avgCond = (logs.reduce((s, c) => s + c.condition, 0) / logs.length).toFixed(1);
+      const sleepLogs = logs.filter(c => c.sleepHours != null);
+      const avgSleep = sleepLogs.length > 0 ? (sleepLogs.reduce((s, c) => s + c.sleepHours, 0) / sleepLogs.length).toFixed(1) : '—';
+      const cafLogs = logs.filter(c => c.caffeine != null);
+      const avgCaf = cafLogs.length > 0 ? (cafLogs.reduce((s, c) => s + c.caffeine, 0) / cafLogs.length).toFixed(1) : '—';
+      html += '<div class="cond-chart-section"><div class="cond-chart-title">📋 サマリー（' + logs.length + '日分）</div>';
+      html += '<div class="cond-stat-grid">' +
+        '<div class="cond-stat-card"><div class="cond-stat-card-title">平均体調</div><div class="cond-stat-card-value">' + avgCond + ' / 5</div></div>' +
+        '<div class="cond-stat-card"><div class="cond-stat-card-title">平均睡眠</div><div class="cond-stat-card-value">' + avgSleep + (avgSleep !== '—' ? 'h' : '') + '</div></div>' +
+        '<div class="cond-stat-card"><div class="cond-stat-card-title">平均カフェイン</div><div class="cond-stat-card-value">' + avgCaf + (avgCaf !== '—' ? '杯' : '') + '</div></div>' +
+        '<div class="cond-stat-card"><div class="cond-stat-card-title">記録日数</div><div class="cond-stat-card-value">' + logs.length + '日</div></div>' +
+      '</div></div>';
+
+      // 5. インサイト（自動分析コメント）
+      const insights = [];
+      // 曜日分析
+      let bestDay = -1, bestDayAvg = 0;
+      dayOrder.forEach(i => {
+        if (dayData[i].count >= 2) {
+          const avg = dayData[i].total / dayData[i].count;
+          if (avg > bestDayAvg) { bestDayAvg = avg; bestDay = i; }
+        }
+      });
+      if (bestDay >= 0) insights.push(dayNames[bestDay] + '曜日の体調が最も良い傾向があります（平均' + bestDayAvg.toFixed(1) + '）。');
+      // 睡眠分析
+      if (sleepLogs.length >= 3) {
+        const goodSleep = sleepLogs.filter(c => c.condition >= 4);
+        const badSleep = sleepLogs.filter(c => c.condition <= 2);
+        if (goodSleep.length > 0 && badSleep.length > 0) {
+          const goodAvg = (goodSleep.reduce((s, c) => s + c.sleepHours, 0) / goodSleep.length).toFixed(1);
+          const badAvg = (badSleep.reduce((s, c) => s + c.sleepHours, 0) / badSleep.length).toFixed(1);
+          if (parseFloat(goodAvg) > parseFloat(badAvg)) {
+            insights.push('体調が良い日の平均睡眠は' + goodAvg + '時間、悪い日は' + badAvg + '時間です。');
+          }
+        }
+      }
+      // 気圧分析
+      const pressLogs = logs.filter(c => c.pressure != null);
+      if (pressLogs.length >= 3) {
+        const lowPress = pressLogs.filter(c => c.pressure < 1010);
+        const highPress = pressLogs.filter(c => c.pressure >= 1013);
+        if (lowPress.length > 0 && highPress.length > 0) {
+          const lowAvg = (lowPress.reduce((s, c) => s + c.condition, 0) / lowPress.length).toFixed(1);
+          const highAvg = (highPress.reduce((s, c) => s + c.condition, 0) / highPress.length).toFixed(1);
+          if (parseFloat(highAvg) - parseFloat(lowAvg) >= 0.5) {
+            insights.push('低気圧（<1010hPa）の日は体調が下がる傾向があります。');
+          }
+        }
+      }
+
+      if (insights.length > 0) {
+        html += '<div class="cond-chart-section"><div class="cond-chart-title">💡 クレアの所見</div>';
+        html += '<div class="cond-insight">' + insights.join('<br>') + '</div></div>';
+      }
+
+      html += '</div>';
+      elements.dialogueText.innerHTML = html;
+
+      const actions = [
+        { label: '体調の履歴', value: '体調の履歴を見たい' },
+        { label: '体調を報告', value: '体調を報告したい' },
+        { label: 'メインに戻る', value: 'メインに戻る' }
+      ];
+      elements.quickActions.innerHTML = actions.map(a => '<button class="quick-action-btn" data-value="' + a.value + '">' + a.label + '</button>').join('');
+      elements.quickActions.querySelectorAll('.quick-action-btn').forEach(btn => {
+        btn.addEventListener('click', () => { if (btn.dataset.value) { elements.userInput.value = btn.dataset.value; handleSendMessage(); } });
+      });
+    }
+
+    // === 実績システム ===
+
+    const ACHIEVEMENTS = [
+      // 学習記録系
+      { id: 'first_quest',    icon: '📜', name: '最初の一歩',       desc: '初めて書簡を綴った',         check: () => AppState.quests.length >= 1 },
+      { id: 'quest_10',       icon: '📚', name: '十の軌跡',        desc: '書簡を10通綴った',           check: () => AppState.quests.length >= 10 },
+      { id: 'quest_30',       icon: '📖', name: '三十の軌跡',      desc: '書簡を30通綴った',           check: () => AppState.quests.length >= 30 },
+      { id: 'quest_100',      icon: '🏛️', name: '百の叡智',        desc: '書簡を100通綴った',          check: () => AppState.quests.length >= 100 },
+      // 浄化系
+      { id: 'first_conquer',  icon: '🕯️', name: '最初の灯り',      desc: '初めて領土の霧を晴らした',     check: () => AppState.territories.filter(t => t.conquered).length >= 1 },
+      { id: 'conquer_5',      icon: '🛡️', name: '五つの灯火',      desc: '5つの領土の霧を晴らした',      check: () => AppState.territories.filter(t => t.conquered).length >= 5 },
+      { id: 'conquer_10',     icon: '👑', name: '十の灯火',        desc: '10の領土の霧を晴らした',       check: () => AppState.territories.filter(t => t.conquered).length >= 10 },
+      { id: 'conquer_all',    icon: '🌟', name: '完全なる浄化',    desc: '全ての領土の霧を晴らした',     check: () => AppState.territories.length > 0 && AppState.territories.every(t => t.conquered) },
+      // テスト系
+      { id: 'perfect_score',  icon: '💎', name: '完璧なる炎',      desc: '浄化度100%を達成した',       check: () => AppState.testHistory.some(t => t.score === 100) },
+      { id: 'test_10',        icon: '📝', name: '十の献火',        desc: '篝火に10回書簡を焚べた',     check: () => AppState.testHistory.length >= 10 },
+      // 学習時間系
+      { id: 'study_5h',       icon: '⏰', name: '五時間の研鑽',    desc: '累計5時間の遠征を達成',        check: () => getTotalStudyMinutes() >= 300 },
+      { id: 'study_20h',      icon: '🔥', name: '二十時間の猛者',  desc: '累計20時間の遠征を達成',       check: () => getTotalStudyMinutes() >= 1200 },
+      { id: 'study_50h',      icon: '⭐', name: '五十時間の賢者',  desc: '累計50時間の遠征を達成',       check: () => getTotalStudyMinutes() >= 3000 },
+      // ストリーク系
+      { id: 'streak_3',       icon: '🔥', name: '三日の灯火',      desc: '3日連続で遠征した',            check: () => AppState.streak.longest >= 3 },
+      { id: 'streak_7',       icon: '🔥', name: '七日の炎',        desc: '7日連続で遠征した',            check: () => AppState.streak.longest >= 7 },
+      { id: 'streak_30',      icon: '🔥', name: '三十日の焔',      desc: '30日連続で遠征した',           check: () => AppState.streak.longest >= 30 },
+      // 特殊
+      { id: 'kingdom_created', icon: '🏰', name: '王国の夜明け',   desc: '王国を作成した',               check: () => !!AppState.kingdom },
+      { id: 'night_study',    icon: '🌙', name: '深夜の遠征',      desc: '夜間（22時以降）に遠征した',   check: () => AppState.quests.some(q => { const h = new Date(q.completedAt).getHours(); return h >= 22 || h < 5; }) },
+      { id: 'early_study',    icon: '🌅', name: '暁の騎士',        desc: '早朝（6時前）に遠征した',      check: () => AppState.quests.some(q => { const h = new Date(q.completedAt).getHours(); return h >= 4 && h < 6; }) }
+    ];
+
+    function getTotalStudyMinutes() {
+      return AppState.quests.reduce((sum, q) => sum + (q.duration || 0), 0);
+    }
+
+    function checkAchievements() {
+      const newlyUnlocked = [];
+      ACHIEVEMENTS.forEach(ach => {
+        if (AppState.achievements[ach.id]) return;
+        if (ach.check()) {
+          AppState.achievements[ach.id] = { unlockedAt: new Date().toISOString() };
+          newlyUnlocked.push(ach);
+        }
+      });
+      if (newlyUnlocked.length > 0) {
+        saveState();
+        renderAchievements();
+        newlyUnlocked.forEach((ach, i) => {
+          setTimeout(() => showAchievementPopup(ach), i * 800);
+        });
+      }
+      return newlyUnlocked;
+    }
+
+    function showAchievementPopup(ach) {
+      const popup = document.createElement('div');
+      popup.className = 'achievement-popup';
+      popup.innerHTML = '<div class="ach-pop-icon">' + ach.icon + '</div>' +
+        '<div class="ach-pop-text"><span>実績解除</span>' + ach.name + '</div>';
+      document.body.appendChild(popup);
+      setTimeout(() => popup.remove(), 3000);
+    }
+
+    function renderAchievements() {
+      const grid = document.getElementById('achievements-grid');
+      if (!grid) return;
+      const unlocked = ACHIEVEMENTS.filter(a => AppState.achievements[a.id]);
+      document.getElementById('ach-unlocked').textContent = unlocked.length;
+      document.getElementById('ach-total').textContent = ACHIEVEMENTS.length;
+      document.getElementById('ach-longest-streak').textContent = AppState.streak.longest;
+
+      grid.innerHTML = ACHIEVEMENTS.map(ach => {
+        const data = AppState.achievements[ach.id];
+        const isUnlocked = !!data;
+        const dateStr = data ? new Date(data.unlockedAt).toLocaleDateString('ja-JP') : '';
+        const progress = getAchievementProgress(ach);
+        return '<div class="achievement-card ' + (isUnlocked ? 'unlocked' : 'locked') + '">' +
+          '<div class="achievement-icon">' + ach.icon + '</div>' +
+          '<div class="achievement-info">' +
+            '<div class="achievement-name">' + ach.name + '</div>' +
+            '<div class="achievement-desc">' + ach.desc + '</div>' +
+            (isUnlocked ? '<div class="achievement-date">🏆 ' + dateStr + ' 達成</div>' : '') +
+          '</div>' +
+          (!isUnlocked && progress ? '<div class="achievement-progress">' + progress + '</div>' : '') +
+        '</div>';
+      }).join('');
+    }
+
+    function getAchievementProgress(ach) {
+      const id = ach.id;
+      if (id === 'quest_10') return AppState.quests.length + '/10';
+      if (id === 'quest_30') return AppState.quests.length + '/30';
+      if (id === 'quest_100') return AppState.quests.length + '/100';
+      if (id === 'conquer_5') return AppState.territories.filter(t => t.conquered).length + '/5';
+      if (id === 'conquer_10') return AppState.territories.filter(t => t.conquered).length + '/10';
+      if (id === 'conquer_all') return AppState.territories.filter(t => t.conquered).length + '/' + AppState.territories.length;
+      if (id === 'test_10') return AppState.testHistory.length + '/10';
+      if (id === 'study_5h') return Math.floor(getTotalStudyMinutes() / 60) + '/5h';
+      if (id === 'study_20h') return Math.floor(getTotalStudyMinutes() / 60) + '/20h';
+      if (id === 'study_50h') return Math.floor(getTotalStudyMinutes() / 60) + '/50h';
+      if (id === 'streak_3') return AppState.streak.longest + '/3';
+      if (id === 'streak_7') return AppState.streak.longest + '/7';
+      if (id === 'streak_30') return AppState.streak.longest + '/30';
+      return '';
+    }
+
+    // === 所持品システム ===
+
+    const ITEMS = [
+      {
+        id: 'memory_pen',
+        icon: '🖊️',
+        name: '記憶の灯筆',
+        type: '神具',
+        desc: '忘却の霧に対抗できる唯一の神具。この灯筆で綴った書簡を篝火に焚べると、霧を晴らす力が生まれる。',
+        lore: 'かつて王国が栄華を誇った時代、知識を司る大書庫の奥深くに安置されていたと伝わる。忘却の霧が王国を飲み込んだ日、この灯筆だけが玉座の間の篝火と共に光を失わなかった。灯筆が選んだ者だけがその力を引き出せるという。',
+        obtain: 'auto'
+      }
+    ];
+
+    function grantItem(itemId) {
+      if (AppState.items[itemId]) return false;
+      AppState.items[itemId] = { obtainedAt: new Date().toISOString() };
+      saveState();
+      return true;
+    }
+
+    function renderItems() {
+      const grid = document.getElementById('items-grid');
+      if (!grid) return;
+      const owned = ITEMS.filter(i => AppState.items[i.id]);
+      document.getElementById('item-owned').textContent = owned.length;
+      document.getElementById('item-total').textContent = ITEMS.length;
+
+      grid.innerHTML = ITEMS.map(item => {
+        const data = AppState.items[item.id];
+        const isOwned = !!data;
+        return '<div class="item-card ' + (isOwned ? 'owned' : 'not-owned') + '" ' + (isOwned ? 'onclick="showItemDetail(\'' + item.id + '\')"' : '') + '>' +
+          '<div class="item-icon">' + item.icon + '</div>' +
+          '<div class="item-info">' +
+            '<div class="item-name">' + (isOwned ? item.name : '？？？') + '</div>' +
+            '<div class="item-type">' + (isOwned ? item.type : '未入手') + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function showItemDetail(itemId) {
+      const item = ITEMS.find(i => i.id === itemId);
+      const data = AppState.items[itemId];
+      if (!item || !data) return;
+      document.getElementById('item-modal-title').textContent = item.name;
+      document.getElementById('item-detail-icon').textContent = item.icon;
+      document.getElementById('item-detail-name').textContent = item.name;
+      document.getElementById('item-detail-type').textContent = item.type;
+      document.getElementById('item-detail-desc').textContent = item.desc;
+      document.getElementById('item-detail-lore').textContent = item.lore;
+      document.getElementById('item-detail-date').textContent = '入手日: ' + new Date(data.obtainedAt).toLocaleDateString('ja-JP');
+      document.getElementById('item-detail-modal').classList.add('active');
+    }
+
+    // === ストリーク（連続学習）機能 ===
+
+    const STREAK_MILESTONES = [
+      { days: 3,  title: '見習い冒険者', message: '三日坊主の壁を突破されました！\n素晴らしい第一歩でございます。' },
+      { days: 7,  title: '熟練の探索者', message: '一週間の連続遠征！\n学習の習慣が身についてまいりましたね。' },
+      { days: 14, title: '不屈の戦士',   message: '二週間、休まず歩み続けるとは...\n貴方様の意志の強さに感服いたします。' },
+      { days: 30, title: '伝説の王',     message: '三十日間の連続遠征...！\n貴方様こそ、真の王にふさわしいお方です。' }
+    ];
+
+    function getTodayStr() {
+      const now = new Date();
+      const jst = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+      return jst.getFullYear() + '-' + String(jst.getMonth() + 1).padStart(2, '0') + '-' + String(jst.getDate()).padStart(2, '0');
+    }
+
+    function getYesterdayStr() {
+      const now = new Date();
+      const jst = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+      jst.setDate(jst.getDate() - 1);
+      return jst.getFullYear() + '-' + String(jst.getMonth() + 1).padStart(2, '0') + '-' + String(jst.getDate()).padStart(2, '0');
+    }
+
+    // 起動時のストリーク判定（'continued' / 'broken' / 'same_day' / 'new'）
+    function checkStreakStatus() {
+      const today = getTodayStr();
+      const yesterday = getYesterdayStr();
+      const last = AppState.streak.lastStudyDate;
+      if (!last) return 'new';
+      if (last === today) return 'same_day';
+      if (last === yesterday) return 'continued';
+      return 'broken';
+    }
+
+    // 学習を記録した日のストリーク更新（クエスト保存・タイマー完了時に呼ぶ）
+    function recordStudyDay() {
+      const today = getTodayStr();
+      if (AppState.streak.lastStudyDate === today) {
+        updateStreakUI();
+        return null;
+      }
+
+      const status = checkStreakStatus();
+      if (status === 'continued' || status === 'new') {
+        AppState.streak.current++;
+      } else if (status === 'broken') {
+        AppState.streak.current = 1;
+      }
+      AppState.streak.lastStudyDate = today;
+      if (AppState.streak.current > AppState.streak.longest) {
+        AppState.streak.longest = AppState.streak.current;
+      }
+      saveState();
+      updateStreakUI();
+
+      // マイルストーン判定
+      const milestone = STREAK_MILESTONES.find(m => m.days === AppState.streak.current && !AppState.streak.titles.includes(m.title));
+      if (milestone) {
+        AppState.streak.titles.push(milestone.title);
+        saveState();
+        return milestone;
+      }
+      return null;
+    }
+
+    function updateStreakUI() {
+      if (AppState.streak.current > 0) {
+        elements.streakDisplay.style.display = '';
+        elements.streakCount.textContent = AppState.streak.current;
+      } else {
+        elements.streakDisplay.style.display = 'none';
+      }
+    }
+
+    function showMilestonePopup(milestone) {
+      const overlay = document.createElement('div');
+      overlay.className = 'streak-milestone';
+      overlay.innerHTML = '<div class="milestone-icon">🏆</div>' +
+        '<div class="milestone-title">称号獲得</div>' +
+        '<div class="milestone-subtitle">「' + milestone.title + '」</div>' +
+        '<div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1rem;">🔥 連続' + milestone.days + '日達成！</div>' +
+        '<button class="milestone-btn">すばらしい！</button>';
+      document.body.appendChild(overlay);
+      overlay.querySelector('.milestone-btn').addEventListener('click', () => {
+        overlay.remove();
+        const d = expandTemplate(CLAIRE_EVENTS.streakMilestone, { streak: milestone.days, title: milestone.title, message: milestone.message });
+        showDialogue(d.text, d.expression, [{ label: '書簡を綴る', value: '書簡を綴りたい' }, { label: '戻る', value: 'メインに戻る' }]);
+      });
+    }
+
+    // 起動時ストリーク処理（getInitialGreeting内で使用）
+    function processStreakOnInit() {
+      const status = checkStreakStatus();
+      if (status === 'broken' && AppState.streak.current > 0) {
+        AppState.streak.current = 0;
+        saveState();
+      }
+      updateStreakUI();
+    }
+
+    init();
+  </script>
+</body>
+</html>
