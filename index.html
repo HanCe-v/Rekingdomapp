@@ -131,7 +131,27 @@
     .vn-background-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, rgba(10, 10, 15, 0.3) 0%, rgba(10, 10, 15, 0.1) 50%, rgba(10, 10, 15, 0.4) 100%); z-index: 1; pointer-events: none; }
     .vn-character-area { flex: 1; display: flex; justify-content: center; align-items: flex-end; position: relative; z-index: 10; min-height: 200px; }
     .claire-sprite { max-height: 100%; max-width: 90%; object-fit: contain; object-position: bottom center; transition: opacity 0.3s ease, transform 0.3s ease; filter: drop-shadow(0 0 30px rgba(0, 0, 0, 0.5)); }
+    .sprite-wrapper { position: relative; display: flex; align-items: flex-end; justify-content: center; height: 100%; max-height: 100%; overflow: visible; }
     .claire-sprite.changing { opacity: 0; transform: scale(0.98); }
+    /* スプライトリアクション演出 */
+    @keyframes spriteReact { 0% { transform: translateY(0); } 25% { transform: translateY(-8px); } 50% { transform: translateY(0); } 75% { transform: translateY(-4px); } 100% { transform: translateY(0); } }
+    @keyframes emotePopIn { 0% { opacity: 0; transform: scale(0); } 60% { opacity: 1; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+    @keyframes emoteFadeOut { 0% { opacity: 1; } 100% { opacity: 0; transform: scale(0.5); } }
+    .claire-sprite.react { animation: spriteReact 0.5s ease; }
+    .claire-emote { position: absolute; top: 3%; left: -10px; width: 40px; height: 45px; z-index: 15; pointer-events: none; animation: emotePopIn 0.35s ease forwards; }
+    .claire-emote.fade-out { animation: emoteFadeOut 0.4s ease forwards; }
+    .emote-spike { position: absolute; bottom: 0; left: 50%; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 22px solid #ffe84d; transform-origin: bottom center; }
+    .emote-spike:nth-child(1) { transform: translateX(-50%) rotate(-30deg); }
+    .emote-spike:nth-child(2) { transform: translateX(-50%) rotate(0deg); }
+    .emote-spike:nth-child(3) { transform: translateX(-50%) rotate(30deg); }
+    /* ？マーク */
+    .emote-question { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Georgia', serif; font-size: 1.8rem; font-weight: 800; color: #fff; text-shadow: 0 0 6px rgba(255,255,255,0.6), 2px 2px 0 rgba(0,0,0,0.2); line-height: 1; }
+    /* 汗エフェクト */
+    @keyframes sweatDrop { 0% { transform: translateY(-3px); } 100% { transform: translateY(3px); } }
+    .emote-sweat { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -55%); width: 30px; height: 35px; }
+    .sweat-drop { position: absolute; background: #a8ddf0; border-radius: 50% 50% 50% 0%; }
+    .sweat-drop:nth-child(1) { width: 14px; height: 18px; top: 0; right: 0; transform: rotate(35deg); animation: sweatDrop 0.8s ease-in-out infinite alternate; }
+    .sweat-drop:nth-child(2) { width: 18px; height: 14px; bottom: 0; left: 0; transform: rotate(-25deg); animation: sweatDrop 0.8s ease-in-out 0.2s infinite alternate; }
     .scene-blackout { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 25; opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
     .scene-blackout.active { opacity: 1; }
     /* 篝火演出オーバーレイ */
@@ -295,6 +315,7 @@
       .vn-container { position: relative; }
       .vn-character-area { position: absolute; top: 0; left: 0; width: 100%; height: 100%; min-height: unset; z-index: 10; display: flex; justify-content: center; align-items: center; }
       .claire-sprite { max-height: 85%; max-width: 95%; object-position: center; }
+      .sprite-wrapper { max-height: 85%; height: 85%; }
       .vn-dialogue-area { position: absolute; bottom: 0; left: 0; right: 0; z-index: 20; padding: 0 0.6rem 0.4rem 0.6rem; max-height: 52%; overflow-y: auto; }
       .speech-bubble { background: linear-gradient(135deg, rgba(16, 16, 30, 0.75) 0%, rgba(12, 12, 20, 0.8) 100%); border: 1px solid rgba(201, 162, 39, 0.25); border-radius: 12px; padding: 0.6rem 0.8rem; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5); }
       .speech-bubble::before, .speech-bubble::after { display: none; }
@@ -338,7 +359,12 @@
     .cond-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
     .cond-tag { padding: 0.35rem 0.6rem; background: var(--bg-medium); border: 1px solid var(--border-subtle); border-radius: 20px; cursor: pointer; font-size: 0.75rem; color: var(--text-secondary); transition: all 0.2s; font-family: 'Noto Sans JP', sans-serif; }
     .cond-tag:hover { border-color: var(--text-secondary); }
-    .cond-tag.active { border-color: var(--accent-red-light); background: rgba(232,100,100,0.15); color: var(--accent-red-light); }
+    .cond-tag.sev-1 { border-color: #e8c840; background: rgba(232,200,64,0.12); color: #e8c840; }
+    .cond-tag.sev-2 { border-color: #e89040; background: rgba(232,144,64,0.15); color: #e89040; }
+    .cond-tag.sev-3 { border-color: #e86464; background: rgba(232,100,100,0.18); color: #e86464; }
+    .cond-tag .sev-indicator { font-size: 0.6rem; margin-left: 0.15rem; }
+    .cond-meal-entry { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+    .cond-meal-memo { flex: 1; padding: 0.35rem 0.5rem; font-size: 0.8rem; }
     .cond-row-group { display: flex; gap: 0.75rem; }
     .cond-row-item { flex: 1; }
     .cond-input-row { display: flex; align-items: center; gap: 0.4rem; }
@@ -456,7 +482,9 @@
             </div>
           </div>
           <div class="vn-character-area">
-            <img src="images/chara/claire/normal.png" alt="クレア" class="claire-sprite" id="claire-sprite">
+            <div class="sprite-wrapper" id="sprite-wrapper">
+              <img src="images/chara/claire/normal.png" alt="クレア" class="claire-sprite" id="claire-sprite">
+            </div>
           </div>
           <div class="vn-dialogue-area">
             <div class="speech-bubble">
@@ -596,7 +624,7 @@
           </div>
         </div>
         <div class="cond-section">
-          <div class="cond-label">症状タグ（複数選択可）</div>
+          <div class="cond-label">症状タグ（タップで重さを選択）</div>
           <div class="cond-tags" id="cond-tags">
             <button class="cond-tag" data-tag="headache">🤕 頭痛</button>
             <button class="cond-tag" data-tag="sleepy">😪 眠気</button>
@@ -620,25 +648,40 @@
         </div>
         <div class="cond-section">
           <div class="cond-label">食事</div>
-          <div class="cond-meal-group" id="cond-meals">
+          <div class="cond-meal-entry">
             <label class="cond-meal"><input type="checkbox" id="cond-meal-b" value="breakfast"><span>朝食</span></label>
+            <input type="text" class="form-input cond-meal-memo" id="cond-meal-b-memo" placeholder="例：パン、コーヒー">
+          </div>
+          <div class="cond-meal-entry">
             <label class="cond-meal"><input type="checkbox" id="cond-meal-l" value="lunch"><span>昼食</span></label>
+            <input type="text" class="form-input cond-meal-memo" id="cond-meal-l-memo" placeholder="例：カレー、サラダ">
+          </div>
+          <div class="cond-meal-entry">
             <label class="cond-meal"><input type="checkbox" id="cond-meal-d" value="dinner"><span>夕食</span></label>
+            <input type="text" class="form-input cond-meal-memo" id="cond-meal-d-memo" placeholder="例：焼き魚、味噌汁">
           </div>
         </div>
         <div class="cond-section cond-row-group">
           <div class="cond-row-item">
-            <div class="cond-label">気温</div>
-            <div class="cond-input-row"><input type="number" class="form-input cond-num" id="cond-temp" placeholder="20" step="0.1"><span class="cond-unit">℃</span></div>
+            <div class="cond-label">最低気温</div>
+            <div class="cond-input-row"><input type="number" class="form-input cond-num" id="cond-temp-min" placeholder="5" step="0.1"><span class="cond-unit">℃</span></div>
           </div>
           <div class="cond-row-item">
-            <div class="cond-label">気圧</div>
-            <div class="cond-input-row"><input type="number" class="form-input cond-num" id="cond-pressure" placeholder="1013" step="0.1"><span class="cond-unit">hPa</span></div>
+            <div class="cond-label">最高気温</div>
+            <div class="cond-input-row"><input type="number" class="form-input cond-num" id="cond-temp-max" placeholder="15" step="0.1"><span class="cond-unit">℃</span></div>
           </div>
         </div>
         <div class="cond-section">
-          <div class="cond-label">メモ（任意）</div>
-          <input type="text" class="form-input" id="cond-note" placeholder="例：薬を飲んだ、運動した">
+          <div class="cond-label">気圧</div>
+          <div class="cond-input-row"><input type="number" class="form-input cond-num" id="cond-pressure" placeholder="1013" step="0.1"><span class="cond-unit">hPa</span></div>
+        </div>
+        <div class="cond-section">
+          <div class="cond-label">🩺 体の状態（任意）</div>
+          <input type="text" class="form-input" id="cond-note-body" placeholder="例：朝から腰が痛い、鼻水が出る">
+        </div>
+        <div class="cond-section">
+          <div class="cond-label">🧠 メンタル・気分（任意）</div>
+          <input type="text" class="form-input" id="cond-note-mental" placeholder="例：気分が沈む、やる気がある">
         </div>
       </div>
       <div class="modal-footer"><button class="btn-secondary" id="cancel-condition">キャンセル</button><button class="btn-primary" id="save-condition">報告する</button></div>
@@ -965,8 +1008,16 @@
       }, 150);
     }
 
-    function showDialogue(text, expression = 'normal', actions = []) {
+    function showDialogue(text, expression = 'normal', actions = [], emote = null) {
       setExpression(expression);
+      // スプライトバウンス演出
+      const sprite = elements.claireSprite;
+      sprite.classList.remove('react');
+      void sprite.offsetWidth; // reflow
+      sprite.classList.add('react');
+      setTimeout(() => sprite.classList.remove('react'), 500);
+      // エモート表示
+      if (emote) { showEmote(emote); }
       elements.dialogueText.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
       elements.quickActions.innerHTML = '';
       setTimeout(() => {
@@ -979,6 +1030,41 @@
           });
         }
       }, 600);
+    }
+
+    function showEmote(emote) {
+      document.querySelectorAll('.claire-emote').forEach(e => e.remove());
+      const el = document.createElement('div');
+      el.className = 'claire-emote';
+      // エモートタイプ判定
+      const sweatEmotes = ['😢', '💤', '❄️'];
+      const questionEmotes = ['？', '?', '…'];
+      if (questionEmotes.includes(emote)) {
+        const q = document.createElement('div');
+        q.className = 'emote-question';
+        q.textContent = '？';
+        el.appendChild(q);
+      } else if (sweatEmotes.includes(emote)) {
+        const wrap = document.createElement('div');
+        wrap.className = 'emote-sweat';
+        for (let i = 0; i < 2; i++) {
+          const drop = document.createElement('div');
+          drop.className = 'sweat-drop';
+          wrap.appendChild(drop);
+        }
+        el.appendChild(wrap);
+      } else {
+        for (let i = 0; i < 3; i++) {
+          const spike = document.createElement('div');
+          spike.className = 'emote-spike';
+          el.appendChild(spike);
+        }
+      }
+      document.getElementById('sprite-wrapper').appendChild(el);
+      setTimeout(() => {
+        el.classList.add('fade-out');
+        setTimeout(() => el.remove(), 500);
+      }, 1500);
     }
 
     // === 書簡リスト表示（クレアのセリフ欄内） ===
@@ -1167,8 +1253,8 @@
       document.getElementById('close-item-modal').addEventListener('click', () => document.getElementById('item-detail-modal').classList.remove('active'));
 
       // 体調モーダル
-      document.getElementById('close-condition-modal').addEventListener('click', () => document.getElementById('condition-modal').classList.remove('active'));
-      document.getElementById('cancel-condition').addEventListener('click', () => document.getElementById('condition-modal').classList.remove('active'));
+      document.getElementById('close-condition-modal').addEventListener('click', () => { document.getElementById('condition-modal').classList.remove('active'); const d = getDefaultDialogue(); showDialogue(d.text, d.expression, d.actions); });
+      document.getElementById('cancel-condition').addEventListener('click', () => { document.getElementById('condition-modal').classList.remove('active'); const d = getDefaultDialogue(); showDialogue(d.text, d.expression, d.actions); });
       document.getElementById('save-condition').addEventListener('click', saveCondition);
       document.querySelectorAll('.cond-level-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1177,9 +1263,27 @@
         });
       });
       document.querySelectorAll('.cond-tag').forEach(btn => {
-        btn.addEventListener('click', () => btn.classList.toggle('active'));
+        btn.addEventListener('click', () => {
+          const sevLabels = ['軽', '中', '重'];
+          if (!btn.classList.contains('sev-1') && !btn.classList.contains('sev-2') && !btn.classList.contains('sev-3')) {
+            btn.classList.add('sev-1');
+            btn.dataset.severity = '1';
+            updateSevIndicator(btn, sevLabels[0]);
+          } else if (btn.classList.contains('sev-1')) {
+            btn.classList.remove('sev-1'); btn.classList.add('sev-2');
+            btn.dataset.severity = '2';
+            updateSevIndicator(btn, sevLabels[1]);
+          } else if (btn.classList.contains('sev-2')) {
+            btn.classList.remove('sev-2'); btn.classList.add('sev-3');
+            btn.dataset.severity = '3';
+            updateSevIndicator(btn, sevLabels[2]);
+          } else {
+            btn.classList.remove('sev-3');
+            btn.dataset.severity = '';
+            removeSevIndicator(btn);
+          }
+        });
       });
-
       // 同期モーダル
       document.getElementById('sync-btn').addEventListener('click', () => {
         const cfg = SyncManager.loadConfig();
@@ -1325,7 +1429,19 @@
           return { text: '📚 本日の学習：' + todayMin + '分\n\n' + picked.text, expression: picked.expression, actions: actions };
         }
       }
-      return expandTemplate(CLAIRE_SYSTEM.default);
+      const defaults = CLAIRE_SYSTEM.default;
+      const dateSeed = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' });
+      let hash = 0;
+      for (let i = 0; i < dateSeed.length; i++) { hash = ((hash << 5) - hash) + dateSeed.charCodeAt(i); hash |= 0; }
+      const picked = defaults[Math.abs(hash) % defaults.length];
+      const defaultActions = [
+        { label: '書簡を綴る', value: '書簡を綴りたい' },
+        { label: '書簡を確認', value: '書簡を確認したい' },
+        { label: '篝火に焚べる', value: 'テストの結果を報告したい' },
+        { label: '体調を報告', value: '体調を報告したい' },
+        { label: '霧の状況を確認', value: '復習が必要な領土を教えて' }
+      ];
+      return { text: picked.text, expression: picked.expression, actions: defaultActions };
     }
 
     function setupTabNavigation() {
@@ -1357,7 +1473,24 @@
       elements.dialogueText.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
       elements.quickActions.innerHTML = '';
       setExpression('normal');
-      setTimeout(() => { const response = processUserMessage(content); if (response) { showDialogue(response.text, response.expression, response.actions); } elements.sendBtn.disabled = false; updateUI(); }, 800 + Math.random() * 400);
+      setTimeout(() => { const response = processUserMessage(content); if (response) { showDialogue(response.text, response.expression, response.actions, response.emote || null); } elements.sendBtn.disabled = false; updateUI(); }, 800 + Math.random() * 400);
+    }
+
+    function matchFreeResponse(lower) {
+      const freeResponses = CLAIRE_DIALOGUES.freeResponses || [];
+      for (const entry of freeResponses) {
+        if (entry.keywords.some(kw => lower.includes(kw))) {
+          const responses = entry.responses;
+          const picked = responses[Math.floor(Math.random() * responses.length)];
+          const defaultActions = [
+            { label: '書簡を綴る', value: '書簡を綴りたい' },
+            { label: '篝火に焚べる', value: 'テストの結果を報告したい' },
+            { label: 'メインに戻る', value: 'メインに戻る' }
+          ];
+          return { text: picked.text, expression: picked.expression, actions: defaultActions, emote: picked.emote || null };
+        }
+      }
+      return null;
     }
 
     function processUserMessage(content) {
@@ -1390,6 +1523,9 @@
         if (!AppState.kingdom) { return { text: 'まだ王国が作成されておりません。', expression: 'normal', actions: [{ label: 'AWS-SAAで作成', value: 'AWS Solutions Architect Associateで王国を作成' }] }; }
         return { text: AppState.kingdom.name + 'の現状をご報告いたします。\n浄化済み領土: ' + AppState.territories.filter(t => t.conquered).length + ' / ' + AppState.territories.length + '\n浄化率: ' + calculateProgress() + '%', expression: 'normal', actions: [{ label: '書簡を綴る', value: '書簡を綴りたい' }, { label: '篝火に焚べる', value: '篝火に焚べたい' }, { label: '霧の状況を確認', value: '復習が必要な領土を教えて' }] };
       }
+      // 自由入力への反応
+      const freeMatch = matchFreeResponse(lower);
+      if (freeMatch) { return freeMatch; }
       if (AppState.kingdom) { return { text: 'ご命令をお待ちしております。', expression: 'normal', actions: [{ label: '書簡を綴る', value: '書簡を綴りたい' }, { label: '書簡を確認', value: '書簡を確認したい' }, { label: '篝火に焚べる', value: '篝火に焚べたい' }, { label: '霧の状況を確認', value: '復習が必要な領土を教えて' }] }; }
       return { text: '王国を作成いたしましょう。', expression: 'normal', actions: [{ label: 'AWS-SAA', value: 'AWS Solutions Architect Associateで王国を作成' }] };
     }
@@ -2201,26 +2337,53 @@
       return AppState.conditionLogs.find(c => c.date === today);
     }
 
+    function updateSevIndicator(btn, label) {
+      let ind = btn.querySelector('.sev-indicator');
+      if (!ind) { ind = document.createElement('span'); ind.className = 'sev-indicator'; btn.appendChild(ind); }
+      ind.textContent = '(' + label + ')';
+    }
+    function removeSevIndicator(btn) {
+      const ind = btn.querySelector('.sev-indicator');
+      if (ind) ind.remove();
+    }
+
     function openConditionModal() {
       const existing = getTodayCondition();
       // フォームリセット
       document.querySelectorAll('.cond-level-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.cond-tag').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.cond-tag').forEach(b => {
+        b.classList.remove('sev-1', 'sev-2', 'sev-3');
+        b.dataset.severity = '';
+        removeSevIndicator(b);
+      });
       document.getElementById('cond-sleep').value = '';
       document.getElementById('cond-caffeine').value = '';
       document.getElementById('cond-meal-b').checked = false;
       document.getElementById('cond-meal-l').checked = false;
       document.getElementById('cond-meal-d').checked = false;
-      document.getElementById('cond-temp').value = '';
+      document.getElementById('cond-meal-b-memo').value = '';
+      document.getElementById('cond-meal-l-memo').value = '';
+      document.getElementById('cond-meal-d-memo').value = '';
+      document.getElementById('cond-temp-min').value = '';
+      document.getElementById('cond-temp-max').value = '';
       document.getElementById('cond-pressure').value = '';
-      document.getElementById('cond-note').value = '';
+      document.getElementById('cond-note-body').value = '';
+      document.getElementById('cond-note-mental').value = '';
       // 既存データがあれば復元
       if (existing) {
         const lvlBtn = document.querySelector('.cond-level-btn[data-level="' + existing.condition + '"]');
         if (lvlBtn) lvlBtn.classList.add('active');
-        (existing.symptoms || []).forEach(s => {
-          const tag = document.querySelector('.cond-tag[data-tag="' + s + '"]');
-          if (tag) tag.classList.add('active');
+        // 症状復元（重さ対応）
+        const syms = existing.symptoms || [];
+        syms.forEach(s => {
+          const tagName = typeof s === 'object' ? s.tag : s;
+          const sev = typeof s === 'object' ? s.severity : 1;
+          const tag = document.querySelector('.cond-tag[data-tag="' + tagName + '"]');
+          if (tag) {
+            tag.classList.add('sev-' + sev);
+            tag.dataset.severity = sev;
+            updateSevIndicator(tag, ['軽', '中', '重'][sev - 1]);
+          }
         });
         if (existing.sleepHours != null) document.getElementById('cond-sleep').value = existing.sleepHours;
         if (existing.caffeine != null) document.getElementById('cond-caffeine').value = existing.caffeine;
@@ -2228,10 +2391,19 @@
           document.getElementById('cond-meal-b').checked = !!existing.meals.breakfast;
           document.getElementById('cond-meal-l').checked = !!existing.meals.lunch;
           document.getElementById('cond-meal-d').checked = !!existing.meals.dinner;
+          if (existing.meals.breakfastMemo) document.getElementById('cond-meal-b-memo').value = existing.meals.breakfastMemo;
+          if (existing.meals.lunchMemo) document.getElementById('cond-meal-l-memo').value = existing.meals.lunchMemo;
+          if (existing.meals.dinnerMemo) document.getElementById('cond-meal-d-memo').value = existing.meals.dinnerMemo;
         }
-        if (existing.temperature != null) document.getElementById('cond-temp').value = existing.temperature;
+        if (existing.tempMin != null) document.getElementById('cond-temp-min').value = existing.tempMin;
+        if (existing.tempMax != null) document.getElementById('cond-temp-max').value = existing.tempMax;
+        // 旧データ互換
+        if (existing.temperature != null && existing.tempMin == null) document.getElementById('cond-temp-max').value = existing.temperature;
         if (existing.pressure != null) document.getElementById('cond-pressure').value = existing.pressure;
-        if (existing.note) document.getElementById('cond-note').value = existing.note;
+        if (existing.noteBody) document.getElementById('cond-note-body').value = existing.noteBody;
+        if (existing.noteMental) document.getElementById('cond-note-mental').value = existing.noteMental;
+        // 旧noteフィールド互換
+        if (existing.note && !existing.noteBody) document.getElementById('cond-note-body').value = existing.note;
       }
       document.getElementById('condition-modal').classList.add('active');
       showDialogue('ご体調の報告ですね。\n正直にお聞かせください。', 'thinking', []);
@@ -2241,16 +2413,25 @@
       const activeLevel = document.querySelector('.cond-level-btn.active');
       if (!activeLevel) { alert('体調レベルを選択してください'); return; }
       const condition = parseInt(activeLevel.dataset.level);
-      const symptoms = Array.from(document.querySelectorAll('.cond-tag.active')).map(b => b.dataset.tag);
+      // 症状（重さ付き）
+      const symptoms = Array.from(document.querySelectorAll('.cond-tag[data-severity]')).filter(b => b.dataset.severity).map(b => ({
+        tag: b.dataset.tag,
+        severity: parseInt(b.dataset.severity)
+      }));
       const sleepVal = document.getElementById('cond-sleep').value;
       const caffeineVal = document.getElementById('cond-caffeine').value;
-      const tempVal = document.getElementById('cond-temp').value;
+      const tempMinVal = document.getElementById('cond-temp-min').value;
+      const tempMaxVal = document.getElementById('cond-temp-max').value;
       const pressureVal = document.getElementById('cond-pressure').value;
-      const note = document.getElementById('cond-note').value.trim();
+      const noteBody = document.getElementById('cond-note-body').value.trim();
+      const noteMental = document.getElementById('cond-note-mental').value.trim();
       const meals = {
         breakfast: document.getElementById('cond-meal-b').checked,
         lunch: document.getElementById('cond-meal-l').checked,
-        dinner: document.getElementById('cond-meal-d').checked
+        dinner: document.getElementById('cond-meal-d').checked,
+        breakfastMemo: document.getElementById('cond-meal-b-memo').value.trim(),
+        lunchMemo: document.getElementById('cond-meal-l-memo').value.trim(),
+        dinnerMemo: document.getElementById('cond-meal-d-memo').value.trim()
       };
 
       const today = getTodayDateStr();
@@ -2262,9 +2443,11 @@
         sleepHours: sleepVal !== '' ? parseFloat(sleepVal) : null,
         caffeine: caffeineVal !== '' ? parseInt(caffeineVal) : null,
         meals: meals,
-        temperature: tempVal !== '' ? parseFloat(tempVal) : null,
+        tempMin: tempMinVal !== '' ? parseFloat(tempMinVal) : null,
+        tempMax: tempMaxVal !== '' ? parseFloat(tempMaxVal) : null,
         pressure: pressureVal !== '' ? parseFloat(pressureVal) : null,
-        note: note,
+        noteBody: noteBody,
+        noteMental: noteMental,
         createdAt: new Date().toISOString()
       };
 
@@ -2287,15 +2470,18 @@
 
     function getConditionComment(entry) {
       const lv = entry.condition;
-      const syms = entry.symptoms || [];
+      const syms = (entry.symptoms || []).map(s => typeof s === 'object' ? s.tag : s);
+      const hasSevere = (entry.symptoms || []).some(s => typeof s === 'object' && s.severity >= 3);
       if (lv <= 1) {
         return { text: '……お辛そうですね。\n無理は禁物でございます。今日は灯筆を置いて、お体を休めてください。\n篝火はこのクレアが守りますから。', expression: 'worried' };
       }
       if (lv === 2) {
         if (syms.includes('headache')) return { text: '頭痛がおありなのですね……。\n温かいお飲み物でもいかがでしょう。\n短い書簡だけでも、きっと力になります。', expression: 'worried' };
+        if (hasSevere) return { text: '重い症状がおありのようですね……。\nどうかお体を第一にお考えください。', expression: 'worried' };
         return { text: '少しお疲れのようですね。\nくれぐれもご無理なさらず、できる範囲でお願いいたします。', expression: 'thinking' };
       }
       if (lv === 3) {
+        if (hasSevere) return { text: '体調は普通とのことですが、症状が気になります。\n悪化しないよう、お気をつけくださいませ。', expression: 'thinking' };
         return { text: '承知いたしました。\n体調の記録、ありがとうございます。\n今日もできる範囲で、共に参りましょう。', expression: 'normal' };
       }
       if (lv === 4) {
@@ -2326,7 +2512,12 @@
           const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
           const d = new Date(c.date + 'T00:00:00+09:00');
           const dayStr = c.date.slice(5) + '（' + dayNames[d.getDay()] + '）';
-          const symStr = (c.symptoms || []).slice(0, 3).map(s => SYMPTOM_TAGS[s] || s).join(' ');
+          const symStr = (c.symptoms || []).slice(0, 3).map(s => {
+            const tag = typeof s === 'object' ? s.tag : s;
+            const sev = typeof s === 'object' ? s.severity : 0;
+            const sevMark = sev >= 3 ? '❗' : sev >= 2 ? '⚠' : '';
+            return (SYMPTOM_TAGS[tag] || tag) + sevMark;
+          }).join(' ');
           return '<div class="dialogue-quest-card">' +
             '<div class="dqc-icon" style="font-size:1.3rem;">' + CONDITION_LEVELS[c.condition].split(' ')[0] + '</div>' +
             '<div class="dqc-body">' +
@@ -2422,21 +2613,29 @@
         '</div>';
       }).join('') + '</div></div>';
 
-      // 3. 症状ランキング
+      // 3. 症状ランキング（重さ加重）
       const symCount = {};
-      logs.forEach(c => (c.symptoms || []).forEach(s => { symCount[s] = (symCount[s] || 0) + 1; }));
+      const symSevTotal = {};
+      logs.forEach(c => (c.symptoms || []).forEach(s => {
+        const tag = typeof s === 'object' ? s.tag : s;
+        const sev = typeof s === 'object' ? s.severity : 1;
+        symCount[tag] = (symCount[tag] || 0) + 1;
+        symSevTotal[tag] = (symSevTotal[tag] || 0) + sev;
+      }));
       const symRank = Object.entries(symCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
       if (symRank.length > 0) {
         const maxCount = symRank[0][1];
         html += '<div class="cond-chart-section"><div class="cond-chart-title">🏷️ よくある症状</div>';
         html += symRank.map(([tag, count]) => {
           const pct = (count / maxCount) * 100;
+          const avgSev = (symSevTotal[tag] / count).toFixed(1);
+          const sevLabel = avgSev >= 2.5 ? '重め' : avgSev >= 1.5 ? '中程度' : '軽め';
           return '<div class="cond-tag-freq">' +
             '<span class="cond-tag-freq-name">' + (SYMPTOM_TAGS[tag] || tag) + '</span>' +
             '<div style="flex:1;background:var(--bg-medium);border-radius:3px;overflow:hidden;">' +
               '<div class="cond-tag-freq-bar" style="width:' + pct + '%;"></div>' +
             '</div>' +
-            '<span class="cond-tag-freq-count">' + count + '回</span>' +
+            '<span class="cond-tag-freq-count">' + count + '回 (' + sevLabel + ')</span>' +
           '</div>';
         }).join('') + '</div>';
       }
@@ -2488,6 +2687,20 @@
           const highAvg = (highPress.reduce((s, c) => s + c.condition, 0) / highPress.length).toFixed(1);
           if (parseFloat(highAvg) - parseFloat(lowAvg) >= 0.5) {
             insights.push('低気圧（<1010hPa）の日は体調が下がる傾向があります。');
+          }
+        }
+      }
+      // 気温分析
+      const tempLogs = logs.filter(c => c.tempMax != null || c.temperature != null);
+      if (tempLogs.length >= 3) {
+        const coldDays = tempLogs.filter(c => (c.tempMax || c.temperature) < 10);
+        const warmDays = tempLogs.filter(c => (c.tempMax || c.temperature) >= 15);
+        if (coldDays.length > 0 && warmDays.length > 0) {
+          const coldAvg = (coldDays.reduce((s, c) => s + c.condition, 0) / coldDays.length).toFixed(1);
+          const warmAvg = (warmDays.reduce((s, c) => s + c.condition, 0) / warmDays.length).toFixed(1);
+          if (Math.abs(parseFloat(warmAvg) - parseFloat(coldAvg)) >= 0.5) {
+            const better = parseFloat(warmAvg) > parseFloat(coldAvg) ? '暖かい日' : '涼しい日';
+            insights.push(better + 'の方が体調が良い傾向があります。');
           }
         }
       }
