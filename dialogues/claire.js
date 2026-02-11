@@ -169,17 +169,28 @@ const CLAIRE_DIALOGUES = {
     },
 
     // デフォルト（キャンセル時など）
-    default: {
-      text: 'ご命令をお待ちしております。\n何なりとお申し付けください。',
-      expression: 'normal',
-      actions: [
-        { label: '書簡を綴る', value: '書簡を綴りたい' },
-        { label: '書簡を確認', value: '書簡を確認したい' },
-        { label: '篝火に焚べる', value: 'テストの結果を報告したい' },
-        { label: '体調を報告', value: '体調を報告したい' },
-        { label: '霧の状況を確認', value: '復習が必要な領土を教えて' }
-      ]
-    },
+    default: [
+      {
+        text: 'ご命令をお待ちしております。\n何なりとお申し付けください。',
+        expression: 'normal'
+      },
+      {
+        text: 'いつでも準備は万端でございます。\nお力になれることがあれば、何なりと。',
+        expression: 'normal'
+      },
+      {
+        text: '……特にご用がなくとも、お側にいるだけで私は十分でございます。',
+        expression: 'smile'
+      },
+      {
+        text: '今日も王国の復興に向けて……\n共に歩ませていただけますか？',
+        expression: 'smile'
+      },
+      {
+        text: '何もせずにここにいるのも……\nそれはそれで、悪くない時間でございます。',
+        expression: 'thinking'
+      }
+    ],
 
     // 王国未作成時のデフォルト
     defaultNoKingdom: {
@@ -435,6 +446,72 @@ const CLAIRE_DIALOGUES = {
       '一ヶ月以上の連続……伝説の騎士にも並ぶ偉業でございます。',
       'もはや忘却の霧の方が、貴方様を恐れているのではないでしょうか。',
       'この灯筆の軌跡こそ、王国最大の宝でございます。'
+    ]}
+  ],
+
+  // 自由入力への反応パターン
+  freeResponses: [
+    // 挨拶
+    { keywords: ['おはよう'], responses: [
+      { text: 'おはようございます、我が主よ。\n良き朝ですね。今日も共に参りましょう。', expression: 'smile', emote: '☀️' },
+      { text: 'おはようございます。\nお目覚めはいかがですか？', expression: 'smile', emote: '☀️' }
+    ]},
+    { keywords: ['こんにちは', 'こんちは'], responses: [
+      { text: 'こんにちは、我が主よ。\n今日もお元気そうで何よりです。', expression: 'smile', emote: '✨' }
+    ]},
+    { keywords: ['こんばんは', 'こんばんわ'], responses: [
+      { text: 'こんばんは。\n夜の篝火は格別に美しゅうございますね。', expression: 'smile', emote: '🌙' }
+    ]},
+    { keywords: ['おやすみ', 'もう寝る', '寝ます'], responses: [
+      { text: 'おやすみなさいませ、我が主よ。\n今日も一日、お疲れ様でございました。\n良い夢を……。', expression: 'smile', emote: '💤' },
+      { text: '灯筆を置いて、今夜はゆっくりお休みください。\n明日もこの篝火の前でお待ちしております。', expression: 'smile', emote: '💤' }
+    ]},
+    // 感謝
+    { keywords: ['ありがとう', 'ありがと', 'サンキュー'], responses: [
+      { text: 'もったいないお言葉です。\n私こそ、貴方様にお仕えできて光栄でございます。', expression: 'smile', emote: '♪' },
+      { text: 'そのようなお言葉……照れてしまいます。\nこちらこそ、いつもありがとうございます。', expression: 'smile', emote: '♪' }
+    ]},
+    // 疲労・ネガティブ
+    { keywords: ['疲れた', 'つかれた', '疲れ'], responses: [
+      { text: 'お疲れのご様子……。\n少し休まれてはいかがでしょう。\n篝火のそばで、温かいお茶でも。', expression: 'worried', emote: '😢' },
+      { text: '無理は禁物でございますよ。\n今日は灯筆を置いて、ゆっくりなさっても。', expression: 'worried', emote: '😢' }
+    ]},
+    { keywords: ['眠い', 'ねむい', '眠たい'], responses: [
+      { text: '眠気が……。少し仮眠を取られてはいかがですか？\n短い休息も、学びの力になりますよ。', expression: 'thinking', emote: '💤' }
+    ]},
+    { keywords: ['つらい', '辛い', 'しんどい', 'きつい'], responses: [
+      { text: '……お辛いのですね。\n無理にお話しにならなくても大丈夫です。\nここにおりますから。', expression: 'worried', emote: '😢' }
+    ]},
+    { keywords: ['不安', '心配', '自信ない', '自信がない'], responses: [
+      { text: '不安なお気持ち、よくわかります。\nですが、ここまで歩まれたこと自体が、もう立派な証でございます。', expression: 'thinking', emote: '…' },
+      { text: '大丈夫です。\n一歩ずつ、貴方様のペースで参りましょう。\n私がお側におりますから。', expression: 'smile', emote: '✨' }
+    ]},
+    // ポジティブ・やる気
+    { keywords: ['頑張る', 'がんばる', 'やるぞ', 'やる気'], responses: [
+      { text: 'その意気でございます！\n篝火も貴方様に応えるように、力強く燃えております！', expression: 'proud', emote: '🔥' },
+      { text: '素晴らしい決意です！\nこのクレア、全力でお支えいたします！', expression: 'proud', emote: '🔥' }
+    ]},
+    { keywords: ['やった', 'できた', 'うれしい', '嬉しい'], responses: [
+      { text: 'おめでとうございます！\n……私も、とても嬉しいです。', expression: 'proud', emote: '🎉' },
+      { text: 'やりましたね！\nその喜びの表情、篝火の灯よりもまぶしゅうございます。', expression: 'proud', emote: '🎉' }
+    ]},
+    // クレア関連
+    { keywords: ['かわいい', '可愛い', 'きれい', '綺麗', '好き'], responses: [
+      { text: 'な……っ！\nそのような……近衛騎士に対して、突然何をおっしゃるのですか……！', expression: 'smile', emote: '！？' },
+      { text: '……からかわないでくださいませ。\n篝火の灯りのせいで、顔が赤く見えるだけです。', expression: 'smile', emote: '！？' }
+    ]},
+    { keywords: ['クレア'], responses: [
+      { text: 'はい、お呼びでしょうか？\n何なりとお申し付けください。', expression: 'normal', emote: '？' }
+    ]},
+    // 食事・日常
+    { keywords: ['お腹すいた', '腹減った', 'はらへった', '空腹'], responses: [
+      { text: 'まずはしっかり食事をお取りください。\n空腹では灯筆も冴えませんから。', expression: 'thinking', emote: '🍽' }
+    ]},
+    { keywords: ['暑い', 'あつい'], responses: [
+      { text: '暑いのですね……。\n水分をしっかり取って、涼しい場所でお過ごしくださいませ。', expression: 'thinking', emote: '☀️' }
+    ]},
+    { keywords: ['寒い', 'さむい'], responses: [
+      { text: '寒さが身に染みますね。\n篝火でお体を温めてくださいませ。', expression: 'thinking', emote: '❄️' }
     ]}
   ]
 };
