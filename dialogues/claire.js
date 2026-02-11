@@ -303,7 +303,7 @@ const CLAIRE_DIALOGUES = {
 
     // ストリーク関連
     streakContinued: {
-      text: 'お帰りなさいませ、我が主よ。\n🔥 連続{streak}日目の遠征でございます！\n{kingdomName}の浄化率は{progress}%です。\n篝火もますます力強く燃えております。',
+      text: 'お帰りなさいませ、我が主よ。\n🔥 連続{streak}日目でございます！\n今日の調子はいかがでしょうか。',
       expression: 'proud',
       actions: [
         { label: '書簡を綴る', value: '書簡を綴りたい' },
