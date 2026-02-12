@@ -317,7 +317,6 @@
     .cond-stat-card { padding: 0.4rem; }
     .modal-content { margin: 0.5rem; max-height: 90vh; }
     .chat-btn { width: 38px; height: 38px; }
-    .timer-time { font-size: 2.5rem; }
     /* 体調記録モーダル */
     .condition-modal { max-width: 400px; }
     .condition-modal-body { max-height: 60vh; overflow-y: auto; padding: 0.75rem 1.25rem; }
@@ -374,17 +373,17 @@
     @keyframes splashPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
     .splash-screen.fade-out { opacity: 0; transition: opacity 0.8s ease; pointer-events: none; }
     /* タイマーオーバーレイ */
-    .timer-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
-    .timer-overlay.active { display: flex; }
-    .timer-display { background: rgba(10, 10, 15, 0.75); border: 2px solid var(--border-subtle); border-radius: 16px; padding: 1.25rem 2rem; text-align: center; pointer-events: auto; backdrop-filter: blur(8px); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); min-width: 220px; }
-    .timer-territory { font-size: 0.8rem; color: var(--accent-gold); margin-bottom: 0.25rem; font-weight: 500; }
-    .timer-phase { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+    .timer-overlay { position: absolute; top: 0.5rem; left: 0.5rem; z-index: 50; display: none; pointer-events: none; }
+    .timer-overlay.active { display: block; }
+    .timer-display { background: rgba(10, 10, 15, 0.8); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 0.6rem 0.8rem; text-align: center; pointer-events: auto; backdrop-filter: blur(8px); box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5); min-width: 140px; }
+    .timer-territory { font-size: 0.65rem; color: var(--accent-gold); margin-bottom: 0.15rem; font-weight: 500; }
+    .timer-phase { font-size: 0.6rem; color: var(--text-secondary); margin-bottom: 0.25rem; }
     .timer-phase.work { color: var(--accent-gold-light); }
     .timer-phase.break { color: #6abf7b; }
-    .timer-time { font-family: 'Cinzel', serif; font-size: 3rem; color: var(--text-primary); letter-spacing: 0.1em; line-height: 1; margin-bottom: 0.75rem; }
+    .timer-time { font-family: 'Cinzel', serif; font-size: 1.6rem; color: var(--text-primary); letter-spacing: 0.1em; line-height: 1; margin-bottom: 0.4rem; }
     .timer-time.break { color: #6abf7b; }
-    .timer-controls { display: flex; gap: 0.5rem; justify-content: center; }
-    .timer-ctrl-btn { padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border-subtle); font-family: 'Noto Sans JP', sans-serif; font-size: 0.8rem; cursor: pointer; transition: all 0.2s ease; }
+    .timer-controls { display: flex; gap: 0.3rem; justify-content: center; }
+    .timer-ctrl-btn { padding: 0.3rem 0.6rem; border-radius: 6px; border: 1px solid var(--border-subtle); font-family: 'Noto Sans JP', sans-serif; font-size: 0.65rem; cursor: pointer; transition: all 0.2s ease; }
     .timer-ctrl-btn.pause { background: var(--bg-light); color: var(--text-primary); }
     .timer-ctrl-btn.pause:hover { background: var(--accent-gold); color: var(--bg-darkest); border-color: var(--accent-gold); }
     .timer-ctrl-btn.stop { background: rgba(139, 41, 66, 0.3); color: var(--accent-red-light); border-color: var(--accent-red); }
@@ -747,7 +746,7 @@
     const CLAIRE_TIMER_PAUSED = CLAIRE_DIALOGUES.timerPaused;
     const CLAIRE_TIMER_RESUMED = CLAIRE_DIALOGUES.timerResumed;
 
-    // タイマー状態
+    // タイマー状態（時刻ベース：バックグラウンド進行＋リロード耐性）
     const TimerState = {
       active: false,
       paused: false,
@@ -755,11 +754,35 @@
       phase: null,       // 'work' or 'break'
       territoryId: null,
       territoryName: '',
-      remaining: 0,
-      elapsed: 0,
-      intervalId: null,
-      totalStudyMinutes: 0
+      startedAt: null,      // 現フェーズ開始時刻(ms)
+      pausedAt: null,       // 一時停止した時刻(ms) null=稼働中
+      pausedTotal: 0,       // 累計一時停止時間(ms)
+      phaseDuration: 0,     // 現フェーズの制限時間(秒) ポモドーロ用
+      totalStudyMs: 0,      // 前フェーズまでの確定学習時間(ms)
+      intervalId: null
     };
+
+    function saveTimerState() {
+      const s = {
+        active: TimerState.active, paused: TimerState.paused,
+        mode: TimerState.mode, phase: TimerState.phase,
+        territoryId: TimerState.territoryId, territoryName: TimerState.territoryName,
+        startedAt: TimerState.startedAt, pausedAt: TimerState.pausedAt,
+        pausedTotal: TimerState.pausedTotal, phaseDuration: TimerState.phaseDuration,
+        totalStudyMs: TimerState.totalStudyMs
+      };
+      localStorage.setItem('rk_timer', JSON.stringify(s));
+    }
+
+    function clearTimerState() {
+      localStorage.removeItem('rk_timer');
+    }
+
+    function getTimerElapsedSec() {
+      if (!TimerState.startedAt) return 0;
+      const now = TimerState.pausedAt || Date.now();
+      return Math.floor((now - TimerState.startedAt - TimerState.pausedTotal) / 1000);
+    }
 
     // テンプレート変数を展開するヘルパー
     function expandTemplate(template, vars = {}) {
@@ -833,6 +856,7 @@
       grantItem('memory_pen');
       updateUI();
       checkReviewAlerts();
+      restoreTimerState();
       // 起動時に既存データで解除可能な実績をサイレントチェック
       ACHIEVEMENTS.forEach(ach => { if (!AppState.achievements[ach.id] && ach.check()) { AppState.achievements[ach.id] = { unlockedAt: new Date().toISOString() }; } });
       saveState(); renderAchievements();
@@ -2117,9 +2141,11 @@
       TimerState.phase = mode === 'pomodoro' ? 'work' : null;
       TimerState.territoryId = territoryId;
       TimerState.territoryName = territory.name;
-      TimerState.elapsed = 0;
-      TimerState.totalStudyMinutes = 0;
-      TimerState.remaining = mode === 'pomodoro' ? 25 * 60 : 0;
+      TimerState.startedAt = Date.now();
+      TimerState.pausedAt = null;
+      TimerState.pausedTotal = 0;
+      TimerState.phaseDuration = mode === 'pomodoro' ? 25 * 60 : 0;
+      TimerState.totalStudyMs = 0;
 
       elements.timerTerritory.textContent = '⚔️ ' + territory.name;
       updateTimerDisplay();
@@ -2129,18 +2155,22 @@
       const dialogue = expandTemplate(CLAIRE_EVENTS.timerStart, { territoryName: territory.name });
       showDialogue(dialogue.text, dialogue.expression, []);
 
+      saveTimerState();
+      startTimerInterval();
+    }
+
+    function startTimerInterval() {
+      clearInterval(TimerState.intervalId);
       TimerState.intervalId = setInterval(tickTimer, 1000);
     }
 
     function tickTimer() {
       if (TimerState.paused) return;
+      const elapsedSec = getTimerElapsedSec();
 
       if (TimerState.mode === 'pomodoro') {
-        TimerState.remaining--;
-        if (TimerState.phase === 'work') {
-          TimerState.elapsed++;
-        }
-        if (TimerState.remaining <= 0) {
+        const remaining = TimerState.phaseDuration - elapsedSec;
+        if (remaining <= 0) {
           if (TimerState.phase === 'work') {
             completePomodorWork();
           } else {
@@ -2148,15 +2178,15 @@
           }
           return;
         }
-      } else {
-        TimerState.elapsed++;
       }
       updateTimerDisplay();
     }
 
     function updateTimerDisplay() {
+      const elapsedSec = getTimerElapsedSec();
       if (TimerState.mode === 'pomodoro') {
-        elements.timerTime.textContent = formatTime(TimerState.remaining);
+        const remaining = Math.max(0, TimerState.phaseDuration - elapsedSec);
+        elements.timerTime.textContent = formatTime(remaining);
         if (TimerState.phase === 'work') {
           elements.timerPhase.textContent = '🔥 集中タイム';
           elements.timerPhase.className = 'timer-phase work';
@@ -2167,7 +2197,7 @@
           elements.timerTime.className = 'timer-time break';
         }
       } else {
-        elements.timerTime.textContent = formatTime(TimerState.elapsed);
+        elements.timerTime.textContent = formatTime(elapsedSec);
         elements.timerPhase.textContent = '✒️ 灯筆執筆中';
         elements.timerPhase.className = 'timer-phase work';
         elements.timerTime.className = 'timer-time';
@@ -2175,17 +2205,34 @@
     }
 
     function toggleTimerPause() {
-      TimerState.paused = !TimerState.paused;
-      elements.timerPause.textContent = TimerState.paused ? '再開' : '一時停止';
       if (TimerState.paused) {
-        const lines = CLAIRE_TIMER_PAUSED;
-        const line = lines[Math.floor(Math.random() * lines.length)];
-        showDialogue(line.text, line.expression, []);
-      } else {
+        // 再開
+        const pausedDuration = Date.now() - TimerState.pausedAt;
+        TimerState.pausedTotal += pausedDuration;
+        TimerState.pausedAt = null;
+        TimerState.paused = false;
+        elements.timerPause.textContent = '一時停止';
         const lines = CLAIRE_TIMER_RESUMED;
         const line = lines[Math.floor(Math.random() * lines.length)];
         showDialogue(line.text, line.expression, []);
+      } else {
+        // 一時停止
+        TimerState.pausedAt = Date.now();
+        TimerState.paused = true;
+        elements.timerPause.textContent = '再開';
+        const lines = CLAIRE_TIMER_PAUSED;
+        const line = lines[Math.floor(Math.random() * lines.length)];
+        showDialogue(line.text, line.expression, []);
       }
+      saveTimerState();
+    }
+
+    function getCurrentStudyMinutes() {
+      // 現フェーズで稼働中の学習時間（分）
+      if (TimerState.mode === 'free' || (TimerState.mode === 'pomodoro' && TimerState.phase === 'work')) {
+        return Math.round(getTimerElapsedSec() / 60);
+      }
+      return 0;
     }
 
     function stopTimer() {
@@ -2194,17 +2241,16 @@
       elements.timerOverlay.classList.remove('active');
       restoreBackground();
 
-      // 作業中の場合のみ経過時間を加算（休憩中は加算しない）
-      if (TimerState.mode === 'free' || (TimerState.mode === 'pomodoro' && TimerState.phase === 'work')) {
-        const studyMinutes = Math.max(1, Math.round(TimerState.elapsed / 60));
-        TimerState.totalStudyMinutes += studyMinutes;
+      const currentMin = getCurrentStudyMinutes();
+      const totalMin = Math.max(1, Math.round((TimerState.totalStudyMs / 60000) + currentMin));
+
+      if (totalMin >= 1) {
+        autoRegisterQuest(TimerState.territoryId, TimerState.territoryName, totalMin);
       }
 
-      if (TimerState.totalStudyMinutes >= 1) {
-        autoRegisterQuest(TimerState.territoryId, TimerState.territoryName, TimerState.totalStudyMinutes);
-      }
+      clearTimerState();
 
-      const dialogue = expandTemplate(CLAIRE_EVENTS.freeStudyDone, { territoryName: TimerState.territoryName, duration: TimerState.totalStudyMinutes || 1 });
+      const dialogue = expandTemplate(CLAIRE_EVENTS.freeStudyDone, { territoryName: TimerState.territoryName, duration: totalMin });
       showDialogue(dialogue.text, dialogue.expression, [
         { label: '続けて書簡を綴る', value: '書簡を綴りたい' },
         { label: '篝火に焚べる', value: 'テストの結果を報告したい' }
@@ -2215,18 +2261,22 @@
       clearInterval(TimerState.intervalId);
       playNotificationSound();
 
-      const studyMinutes = Math.round(TimerState.elapsed / 60);
-      TimerState.totalStudyMinutes += studyMinutes;
+      const studyMs = getTimerElapsedSec() * 1000;
+      TimerState.totalStudyMs += studyMs;
 
+      // 休憩フェーズへ
       TimerState.phase = 'break';
-      TimerState.remaining = 5 * 60;
-      TimerState.elapsed = 0;
+      TimerState.phaseDuration = 5 * 60;
+      TimerState.startedAt = Date.now();
+      TimerState.pausedAt = null;
+      TimerState.pausedTotal = 0;
       updateTimerDisplay();
 
       const dialogue = expandTemplate(CLAIRE_EVENTS.pomodoroWorkDone);
       showDialogue(dialogue.text, dialogue.expression, []);
 
-      TimerState.intervalId = setInterval(tickTimer, 1000);
+      saveTimerState();
+      startTimerInterval();
     }
 
     function completePomodoroBreak() {
@@ -2236,15 +2286,85 @@
       restoreBackground();
       playNotificationSound();
 
-      autoRegisterQuest(TimerState.territoryId, TimerState.territoryName, TimerState.totalStudyMinutes);
+      const totalMin = Math.max(1, Math.round(TimerState.totalStudyMs / 60000));
+      autoRegisterQuest(TimerState.territoryId, TimerState.territoryName, totalMin);
 
-      const dialogue = expandTemplate(CLAIRE_EVENTS.pomodoroBreakDone, { territoryName: TimerState.territoryName, duration: TimerState.totalStudyMinutes });
+      clearTimerState();
+
+      const dialogue = expandTemplate(CLAIRE_EVENTS.pomodoroBreakDone, { territoryName: TimerState.territoryName, duration: totalMin });
       showDialogue(dialogue.text, dialogue.expression, [
         { label: '同じ分野で続ける', value: 'TIMER_SAME' },
         { label: '別の領土で書簡を綴る', value: '書簡を綴りたい' },
         { label: '灯筆を置く', value: 'ご苦労だった' }
       ]);
     }
+
+    // リロード時のタイマー復元
+    function restoreTimerState() {
+      const saved = localStorage.getItem('rk_timer');
+      if (!saved) return;
+      try {
+        const s = JSON.parse(saved);
+        if (!s.active) { clearTimerState(); return; }
+
+        TimerState.active = s.active;
+        TimerState.paused = s.paused;
+        TimerState.mode = s.mode;
+        TimerState.phase = s.phase;
+        TimerState.territoryId = s.territoryId;
+        TimerState.territoryName = s.territoryName;
+        TimerState.startedAt = s.startedAt;
+        TimerState.pausedAt = s.pausedAt;
+        TimerState.pausedTotal = s.pausedTotal;
+        TimerState.phaseDuration = s.phaseDuration;
+        TimerState.totalStudyMs = s.totalStudyMs;
+
+        // ポモドーロでフェーズ制限超過チェック
+        if (TimerState.mode === 'pomodoro') {
+          const elapsedSec = getTimerElapsedSec();
+          if (elapsedSec >= TimerState.phaseDuration) {
+            if (TimerState.phase === 'work') {
+              completePomodorWork();
+            } else {
+              completePomodoroBreak();
+            }
+            return;
+          }
+        }
+
+        // UI復元
+        elements.timerTerritory.textContent = '⚔️ ' + TimerState.territoryName;
+        elements.timerPause.textContent = TimerState.paused ? '再開' : '一時停止';
+        elements.timerOverlay.classList.add('active');
+        updateTimerDisplay();
+        setExpression('__study__');
+
+        startTimerInterval();
+      } catch(e) {
+        console.error('Timer restore error:', e);
+        clearTimerState();
+      }
+    }
+
+    // タブ復帰時の再計算
+    document.addEventListener('visibilitychange', () => {
+      if (!TimerState.active) return;
+      if (document.visibilityState === 'visible') {
+        // ポモドーロのフェーズ超過チェック
+        if (TimerState.mode === 'pomodoro' && !TimerState.paused) {
+          const elapsedSec = getTimerElapsedSec();
+          if (elapsedSec >= TimerState.phaseDuration) {
+            if (TimerState.phase === 'work') {
+              completePomodorWork();
+            } else {
+              completePomodoroBreak();
+            }
+            return;
+          }
+        }
+        updateTimerDisplay();
+      }
+    });
 
     function autoRegisterQuest(territoryId, territoryName, minutes) {
       AppState.quests.push({
@@ -2293,7 +2413,7 @@
 
     // 「同じ分野で続ける」ハンドラー
     function handleTimerSame() {
-      TimerState.totalStudyMinutes = 0;
+      TimerState.totalStudyMs = 0;
       setLibraryBackground();
       startStudyTimer(TimerState.territoryId, 'pomodoro');
     }
